@@ -13,6 +13,8 @@ const REDES = [
   "booksy.com",
   "trinks.com",
   "business.site",
+  "appbarber.com.br",
+  "cashbarber.com.br",
 ];
 
 const CAMINHOS_INSTAGRAM_SEM_PERFIL = ["p", "reel", "reels", "explore", "stories", "accounts", "tv"];

@@ -40,6 +40,12 @@ test("redes, links de bio e apps de agenda são so_rede", () => {
   }
 });
 
+test("apps de agenda achados na busca real (AppBarber, Cash Barber) são so_rede", () => {
+  for (const url of ["https://sites.appbarber.com.br/barbeariadoze", "https://cashbarber.com.br/barbeariadoze"]) {
+    assert.equal(classificarSite(url).classificacao, "so_rede", url);
+  }
+});
+
 test("domínio próprio é site_proprio, inclusive parecido com rede", () => {
   assert.equal(classificarSite("https://www.barbeariadoze.com.br").classificacao, "site_proprio");
   assert.equal(classificarSite("https://notinstagram.com/x").classificacao, "site_proprio");
