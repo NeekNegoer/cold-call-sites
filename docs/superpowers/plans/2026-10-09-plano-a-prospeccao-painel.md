@@ -18,7 +18,7 @@
 - Região: Florianópolis, São José, Palhoça, Biguaçu (Santa Catarina).
 - Nichos v1: `barbearia`; `estetica` (sobrancelha, cílios, unhas, depilação, harmonização, salão de beleza).
 - Fonte: ator `compass/crawler-google-places` da Apify. Descoberta **sem** página de detalhe, **sem** fotos, **sem** avaliações e **sem** filtros pagos do ator (`website`, `skipClosedPlaces`): lugares fechados e com site próprio são descartados no nosso código.
-- Classificação `so_rede` para: instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br, calendly.com, gendo.app, biolink.info.
+- Classificação `so_rede` para: instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br, calendly.com, gendo.app, biolink.info, wa.link.
 - Pontuação: avaliações `min(n,100)/100×50`; nota ≥4,5 → 25, ≥4,0 → 15, ≥3,5 → 5; celular → 15; Instagram → 10.
 - Lote padrão: 25 leads. Teto de gasto por execução: padrão US$1,00, mínimo US$0,50 (exigência da Apify). Saldo conferido antes de rodar. O gasto gravado em `leads/_sistema/uso.json` é estimado (quantidades × `precosUsd` da config), porque a Apify registra o gasto real com atraso.
 - Retenção: lead `perdeu`, ou `novo`/`sem_resposta` sem mudança há mais de 14 dias, tem os dados coletados apagados.

@@ -47,6 +47,7 @@ test("apps de agenda e links de bio achados nas buscas reais são so_rede", () =
     "https://calendly.com/barbeariadoze",
     "https://barbeariadoze.gendo.app/",
     "https://biolink.info/barbeariadoze",
+    "https://wa.link/abc123",
   ]) {
     assert.equal(classificarSite(url).classificacao, "so_rede", url);
   }

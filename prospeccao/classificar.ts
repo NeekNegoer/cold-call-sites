@@ -18,6 +18,7 @@ const REDES = [
   "calendly.com",
   "gendo.app",
   "biolink.info",
+  "wa.link",
 ];
 
 const CAMINHOS_INSTAGRAM_SEM_PERFIL = ["p", "reel", "reels", "explore", "stories", "accounts", "tv"];
