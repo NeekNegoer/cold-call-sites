@@ -6,7 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test \"prospeccao/**/*.test.ts\"",
+    "test": "node --test \"prospeccao/**/*.test.ts\" \"painel/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "buscar": "node --env-file-if-exists=.env prospeccao/cli/buscar.ts",
     "lote": "node prospeccao/cli/lote.ts",
