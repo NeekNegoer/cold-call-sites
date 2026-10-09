@@ -1,0 +1,30 @@
+{
+  "placeId": "ChIJteste000000000000001",
+  "title": "Barbearia Teste Kobrasol",
+  "location": { "lat": -27.5969, "lng": -48.6167 },
+  "openingHours": [
+    { "day": "segunda-feira", "hours": "Closed" },
+    { "day": "terça-feira", "hours": "09:00 to 19:00" }
+  ],
+  "imageUrls": [
+    "https://lh3.googleusercontent.com/gps-cs-s/teste1=w1920-h1080-k-no",
+    "https://lh3.googleusercontent.com/gps-cs-s/teste2=w1920-h1080-k-no"
+  ],
+  "reviews": [
+    {
+      "name": "Cliente Um",
+      "text": "Melhor degradê de São José, atendimento do Marcos é top.",
+      "stars": 5,
+      "rating": 5,
+      "publishedAtDate": "2026-09-20T15:00:00.000Z"
+    },
+    { "name": "Cliente Dois", "text": null, "stars": 4, "rating": 4, "publishedAtDate": "2026-09-10T15:00:00.000Z" },
+    {
+      "name": "Cliente Três",
+      "text": "Ambiente limpo e pontual.",
+      "stars": 5,
+      "rating": 5,
+      "publishedAtDate": "2026-08-30T15:00:00.000Z"
+    }
+  ]
+}

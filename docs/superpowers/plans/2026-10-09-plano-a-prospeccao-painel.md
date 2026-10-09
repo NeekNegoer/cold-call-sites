@@ -10,15 +10,17 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-09-cold-call-sites-design.md` (seções 2, 4, 5, 7, 8, 9).
 
+**Fatos da Apify confirmados no dry-run (2026-10-09):** `prospeccao/apify-notas.md`. A Task 4 já foi feita; a execução começa na Task 1 e pula a 4.
+
 ## Global Constraints
 
 - Node.js 24+; TypeScript executado por type stripping: só sintaxe apagável (sem `enum`, `namespace`, parameter properties), imports relativos com extensão `.ts`, tipos importados com `import type`.
 - Região: Florianópolis, São José, Palhoça, Biguaçu (Santa Catarina).
 - Nichos v1: `barbearia`; `estetica` (sobrancelha, cílios, unhas, depilação, harmonização, salão de beleza).
-- Fonte: ator `compass/crawler-google-places` da Apify. Descoberta **sem** página de detalhe, **sem** fotos, **sem** avaliações. O filtro "website" do ator **não** é usado.
+- Fonte: ator `compass/crawler-google-places` da Apify. Descoberta **sem** página de detalhe, **sem** fotos, **sem** avaliações e **sem** filtros pagos do ator (`website`, `skipClosedPlaces`): lugares fechados e com site próprio são descartados no nosso código.
 - Classificação `so_rede` para: instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site.
 - Pontuação: avaliações `min(n,100)/100×50`; nota ≥4,5 → 25, ≥4,0 → 15, ≥3,5 → 5; celular → 15; Instagram → 10.
-- Lote padrão: 25 leads. Teto de gasto padrão por execução: US$1,00. Saldo conferido antes de rodar; gasto registrado em `leads/_sistema/uso.json`.
+- Lote padrão: 25 leads. Teto de gasto por execução: padrão US$1,00, mínimo US$0,50 (exigência da Apify). Saldo conferido antes de rodar. O gasto gravado em `leads/_sistema/uso.json` é estimado (quantidades × `precosUsd` da config), porque a Apify registra o gasto real com atraso.
 - Retenção: lead `perdeu`, ou `novo`/`sem_resposta` sem mudança há mais de 14 dias, tem os dados coletados apagados.
 - Status do painel: `novo`, `sem_resposta`, `retornar`, `interessado`, `reuniao`, `fechou`, `perdeu`. Motivos de perda: `preco`, `sem_necessidade`, `ja_tem`, `nao_decide`, `outro`.
 - Oferta: Solo (1 profissional) R$59 · Equipe (2–5) R$89 · Casa cheia (6+) R$129 por mês; sem taxa de implantação; sem fidelidade. Ajuste a cada 10 interessados decididos com a tabela atual: 0 recusas por preço → +R$10; 2 ou mais → −R$10.
@@ -151,6 +153,7 @@ export interface LeadBruto {
   avaliacoes: number;
   mapsUrl: string;
   categoria: string | null;
+  fechado: boolean;
 }
 
 export interface Detalhes {
@@ -490,7 +493,9 @@ git commit -m "feat(prospeccao): detect mobile numbers and score leads"
 
 ---
 
-### Task 4: Busca teste na Apify (confirmar campos e custo)
+### Task 4: Busca teste na Apify (confirmar campos e custo) — concluída
+
+**Concluída no dry-run de 2026-10-09** (gasto: US$0,033). `prospeccao/fixtures/lugar-busca.json`, `prospeccao/fixtures/lugar-detalhe.json` e `prospeccao/apify-notas.md` já estão no repositório, com o formato real do ator e dados fictícios. **Pule para a Task 5.** Os passos ficam como registro; para repetir, mantenha `maxTotalChargeUsd` ≥ 0,5.
 
 Pré-requisito: o arquivo `.env` tem `APIFY_TOKEN` (spec seção 9). Esta task gasta uns US$0,05 e não cria código de produção: confirma o formato real do ator e grava fixtures fictícias com esse formato.
 
@@ -501,12 +506,12 @@ Pré-requisito: o arquivo `.env` tem `APIFY_TOKEN` (spec seção 9). Esta task g
 **Interfaces:**
 - Produces: fixtures com as chaves exatas que a Task 5 lê (`title`, `placeId`, `categoryName`, `address`, `neighborhood`, `city`, `phone`, `phoneUnformatted`, `website`, `totalScore`, `reviewsCount`, `url`, `searchString`, `location`, `openingHours[].day/hours`, `imageUrls[]`, `reviews[].name/text/stars`); a forma de pedir detalhes por ID (`placeIds` ou `startUrls`) usada na Task 11.
 
-- [ ] **Step 1: Conferir o token sem mostrar o valor**
+- [x] **Step 1: Conferir o token sem mostrar o valor**
 
 Run: `grep -q '^APIFY_TOKEN=.\+' .env && echo "token ok" || echo "falta APIFY_TOKEN no .env"`
 Expected: `token ok`. Se faltar, pare e peça para a pessoa criar a conta e colar o token no `.env`.
 
-- [ ] **Step 2: Ler o saldo do mês**
+- [x] **Step 2: Ler o saldo do mês**
 
 Run:
 ```bash
@@ -517,7 +522,7 @@ console.log(r.status, JSON.stringify({ limits: j.data?.limits, current: j.data?.
 ```
 Expected: `200`, com `limits.maxMonthlyUsageUsd` (≈5) e `current.monthlyUsageUsd`. Anote os nomes exatos: a Task 6 lê esses dois campos.
 
-- [ ] **Step 3: Rodar uma descoberta pequena (5 lugares)**
+- [x] **Step 3: Rodar uma descoberta pequena (5 lugares)**
 
 Run:
 ```bash
@@ -525,8 +530,8 @@ mkdir -p leads/_sistema
 node --env-file=.env --input-type=module -e '
 const H = { Authorization: `Bearer ${process.env.APIFY_TOKEN}`, "Content-Type": "application/json" };
 const B = "https://api.apify.com/v2";
-const input = { searchStringsArray: ["barbearia"], locationQuery: "Kobrasol, São José, Santa Catarina, Brasil", maxCrawledPlacesPerSearch: 5, language: "pt-BR", skipClosedPlaces: true, scrapePlaceDetailPage: false, maxImages: 0, maxReviews: 0 };
-let { data: run } = await (await fetch(`${B}/acts/compass~crawler-google-places/runs?maxTotalChargeUsd=0.1`, { method: "POST", headers: H, body: JSON.stringify(input) })).json();
+const input = { searchStringsArray: ["barbearia"], locationQuery: "Kobrasol, São José, Santa Catarina, Brasil", maxCrawledPlacesPerSearch: 5, language: "pt-BR", scrapePlaceDetailPage: false, maxImages: 0, maxReviews: 0 };
+let { data: run } = await (await fetch(`${B}/acts/compass~crawler-google-places/runs?maxTotalChargeUsd=0.5`, { method: "POST", headers: H, body: JSON.stringify(input) })).json();
 console.log("run", run.id, run.status);
 while (!["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(run.status)) ({ data: run } = await (await fetch(`${B}/actor-runs/${run.id}?waitForFinish=60`, { headers: H })).json());
 console.log("fim", run.status);
@@ -536,7 +541,7 @@ console.log(itens.length, "itens; chaves:", [...new Set(itens.flatMap((i) => Obj
 ```
 Expected: `fim SUCCEEDED`, até 5 itens, e a lista de chaves contendo pelo menos `title`, `placeId`, `address`, `city`, `phone`, `totalScore`, `reviewsCount`, `url`. Se o ator recusar `language: "pt-BR"`, troque por `"pt"` e anote.
 
-- [ ] **Step 4: Pedir detalhes de 1 lugar por ID**
+- [x] **Step 4: Pedir detalhes de 1 lugar por ID**
 
 Run:
 ```bash
@@ -546,7 +551,7 @@ const H = { Authorization: `Bearer ${process.env.APIFY_TOKEN}`, "Content-Type": 
 const B = "https://api.apify.com/v2";
 const id = JSON.parse(fs.readFileSync("leads/_sistema/amostra-busca.json", "utf8"))[0].placeId;
 const input = { placeIds: [id], language: "pt-BR", scrapePlaceDetailPage: true, maxImages: 2, maxReviews: 2, reviewsSort: "mostRelevant" };
-let { data: run } = await (await fetch(`${B}/acts/compass~crawler-google-places/runs?maxTotalChargeUsd=0.1`, { method: "POST", headers: H, body: JSON.stringify(input) })).json();
+let { data: run } = await (await fetch(`${B}/acts/compass~crawler-google-places/runs?maxTotalChargeUsd=0.5`, { method: "POST", headers: H, body: JSON.stringify(input) })).json();
 while (!["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(run.status)) ({ data: run } = await (await fetch(`${B}/actor-runs/${run.id}?waitForFinish=60`, { headers: H })).json());
 console.log("fim", run.status);
 const itens = await (await fetch(`${B}/datasets/${run.defaultDatasetId}/items?clean=true&format=json`, { headers: H })).json();
@@ -556,105 +561,19 @@ console.log({ chaves: Object.keys(d).sort(), horario: d.openingHours?.[0], revie
 ```
 Expected: `fim SUCCEEDED`, `openingHours[0]` com `day`/`hours`, `reviews[0]` com `name`/`text`/`stars`, `imagens` = 2. Se o ator recusar `placeIds` (execução `FAILED` por entrada inválida), rode de novo trocando por `startUrls: [{ url: "https://www.google.com/maps/place/?q=place_id:" + id }]` e anote qual forma funcionou.
 
-- [ ] **Step 5: Medir o custo**
+- [x] **Step 5: Medir o custo**
 
 Repita o Step 2 e calcule `current.monthlyUsageUsd` depois − antes.
 
-- [ ] **Step 6: Gravar as fixtures fictícias**
+- [x] **Step 6: Gravar as fixtures fictícias**
 
-Crie os dois arquivos abaixo. Eles usam dados inventados, nunca dados reais. Se no Step 3 ou 4 algum campo veio com outro nome ou outro aninhamento, ajuste a fixture para o formato real (a Task 5 lê exatamente estas chaves).
+Feito: os arquivos estão em `prospeccao/fixtures/` (formato real do ator, dados fictícios). A Task 5 lê exatamente as chaves deles.
 
-`prospeccao/fixtures/lugar-busca.json`:
-```json
-[
-  {
-    "title": "Barbearia Teste Kobrasol",
-    "placeId": "ChIJteste000000000000001",
-    "categoryName": "Barbearia",
-    "address": "R. Exemplo, 100 - Kobrasol, São José - SC, 88102-000",
-    "neighborhood": "Kobrasol",
-    "city": "São José",
-    "state": "Santa Catarina",
-    "countryCode": "BR",
-    "phone": "(48) 99999-0001",
-    "phoneUnformatted": "+5548999990001",
-    "website": "https://www.instagram.com/barbeariateste/",
-    "totalScore": 4.8,
-    "reviewsCount": 132,
-    "location": { "lat": -27.5969, "lng": -48.6167 },
-    "url": "https://www.google.com/maps/search/?api=1&query=Barbearia%20Teste&query_place_id=ChIJteste000000000000001",
-    "searchString": "barbearia",
-    "permanentlyClosed": false,
-    "temporarilyClosed": false
-  },
-  {
-    "title": "Studio Teste Sobrancelhas",
-    "placeId": "ChIJteste000000000000002",
-    "categoryName": "Designer de sobrancelhas",
-    "address": "Av. Exemplo, 200 - Centro, Florianópolis - SC, 88010-000",
-    "neighborhood": "Centro",
-    "city": "Florianópolis",
-    "phone": "(48) 3222-0002",
-    "phoneUnformatted": "+554832220002",
-    "totalScore": 4.3,
-    "reviewsCount": 18,
-    "url": "https://www.google.com/maps/search/?api=1&query=Studio%20Teste&query_place_id=ChIJteste000000000000002",
-    "searchString": "design de sobrancelhas"
-  },
-  {
-    "title": "Barbearia Com Site Teste",
-    "placeId": "ChIJteste000000000000003",
-    "categoryName": "Barbearia",
-    "address": "R. Exemplo, 300 - Pagani, Palhoça - SC, 88132-000",
-    "city": "Palhoça",
-    "phone": "(48) 99999-0003",
-    "phoneUnformatted": "+5548999990003",
-    "website": "https://www.barbeariacomsiteteste.com.br/",
-    "totalScore": 4.9,
-    "reviewsCount": 410,
-    "url": "https://www.google.com/maps/search/?api=1&query=Barbearia%20Com%20Site&query_place_id=ChIJteste000000000000003",
-    "searchString": "barbearia"
-  }
-]
-```
+- [x] **Step 7: Registrar o que foi confirmado em `prospeccao/apify-notas.md`**
 
-`prospeccao/fixtures/lugar-detalhe.json`:
-```json
-{
-  "placeId": "ChIJteste000000000000001",
-  "title": "Barbearia Teste Kobrasol",
-  "location": { "lat": -27.5969, "lng": -48.6167 },
-  "openingHours": [
-    { "day": "segunda-feira", "hours": "Fechado" },
-    { "day": "terça-feira", "hours": "09:00 a 19:00" }
-  ],
-  "imageUrls": [
-    "https://lh3.googleusercontent.com/p/teste1=w408-h306-k-no",
-    "https://lh3.googleusercontent.com/p/teste2=w408-h306-k-no"
-  ],
-  "reviews": [
-    { "name": "Cliente Um", "text": "Melhor degradê de São José, atendimento do Marcos é top.", "stars": 5 },
-    { "name": "Cliente Dois", "text": null, "stars": 4 },
-    { "name": "Cliente Três", "text": "Ambiente limpo e pontual.", "stars": 5 }
-  ]
-}
-```
+Feito: `prospeccao/apify-notas.md`.
 
-- [ ] **Step 7: Registrar o que foi confirmado em `prospeccao/apify-notas.md`**
-
-Preencha com os valores medidos nos Steps 2–5:
-```markdown
-# Apify — o que foi confirmado (2026-10-09)
-
-- Saldo: `GET /v2/users/me/limits` → `data.limits.maxMonthlyUsageUsd` e `data.current.monthlyUsageUsd`.
-- Idioma aceito: `pt-BR` (ou o valor que funcionou no Step 3).
-- Detalhes por ID: `placeIds` (ou `startUrls`, se foi o que funcionou no Step 4).
-- Custo medido: busca de 5 lugares = US$<valor>; detalhe de 1 lugar com 2 fotos e 2 avaliações = US$<valor>.
-- Campos que vêm sem página de detalhe: <lista do Step 3>.
-```
-Os `<valor>`/`<lista>` são os números e nomes que você acabou de medir; não deixe nenhum em branco.
-
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add prospeccao/fixtures prospeccao/apify-notas.md
@@ -675,7 +594,7 @@ git commit -m "test(prospeccao): add Apify fixtures and confirmed API notes"
   - `converterLugar(raw: unknown, nicho: string): LeadBruto | null`
   - `normalizar(s: string): string`
   - `naRegiao(l: LeadBruto, cidades: readonly string[]): string | null` (devolve o nome da cidade como está na config)
-  - `type MotivoDescarte = "repetido" | "ja_visto" | "sem_telefone" | "fora_da_regiao" | "site_proprio"`
+  - `type MotivoDescarte = "repetido" | "ja_visto" | "sem_telefone" | "fora_da_regiao" | "site_proprio" | "fechado"`
   - `selecionarCandidatos(brutos: LeadBruto[], vistos: ReadonlySet<string>, cidades: readonly string[]): { candidatos: LeadBruto[]; descartes: Record<MotivoDescarte, number> }`
 
 - [ ] **Step 1: Escrever o teste que falha — `prospeccao/doApify.test.ts`**
@@ -696,7 +615,7 @@ test("converte barbearia com Instagram e celular", () => {
   assert.equal(l.termo, "barbearia");
   assert.equal(l.cidade, "São José");
   assert.equal(l.bairro, "Kobrasol");
-  assert.equal(l.telefone, "(48) 99999-0001");
+  assert.equal(l.telefone, "+55 48 99999-0001");
   assert.equal(l.celular, true);
   assert.equal(l.whatsapp, "https://wa.me/5548999990001");
   assert.equal(l.classificacao, "so_rede");
@@ -704,6 +623,7 @@ test("converte barbearia com Instagram e celular", () => {
   assert.equal(l.nota, 4.8);
   assert.equal(l.avaliacoes, 132);
   assert.equal(l.categoria, "Barbearia");
+  assert.equal(l.fechado, false);
 });
 
 test("sem website é sem_site; fixo não tem WhatsApp", () => {
@@ -738,6 +658,11 @@ test("sem phoneUnformatted usa phone para decidir se é celular", () => {
   assert.ok(l);
   assert.equal(l.celular, true);
   assert.equal(l.whatsapp, "https://wa.me/5548998887777");
+});
+
+test("fechado temporária ou definitivamente vira fechado: true", () => {
+  assert.equal(converterLugar({ placeId: "a", title: "A", permanentlyClosed: true }, "barbearia")?.fechado, true);
+  assert.equal(converterLugar({ placeId: "b", title: "B", temporarilyClosed: true }, "barbearia")?.fechado, true);
 });
 ```
 
@@ -793,6 +718,13 @@ test("São José dos Pinhais (PR) não conta como São José", () => {
   const l: LeadBruto = { ...brutos[0], cidade: "São José dos Pinhais", endereco: "R. Z, 9 - Centro, São José dos Pinhais - PR" };
   assert.equal(naRegiao(l, CIDADES), null);
 });
+
+test("lugar fechado é descartado", () => {
+  const fechado: LeadBruto = { ...brutos[0], placeId: "f", fechado: true };
+  const { candidatos, descartes } = selecionarCandidatos([fechado], new Set(), CIDADES);
+  assert.equal(candidatos.length, 0);
+  assert.equal(descartes.fechado, 1);
+});
 ```
 
 - [ ] **Step 3: Rodar e ver falhar**
@@ -843,6 +775,7 @@ export function converterLugar(raw: unknown, nicho: string): LeadBruto | null {
       texto(r.url) ??
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nome)}&query_place_id=${placeId}`,
     categoria: texto(r.categoryName),
+    fechado: r.permanentlyClosed === true || r.temporarilyClosed === true,
   };
 }
 ```
@@ -852,7 +785,7 @@ export function converterLugar(raw: unknown, nicho: string): LeadBruto | null {
 ```ts
 import type { LeadBruto } from "./tipos.ts";
 
-export type MotivoDescarte = "repetido" | "ja_visto" | "sem_telefone" | "fora_da_regiao" | "site_proprio";
+export type MotivoDescarte = "repetido" | "ja_visto" | "sem_telefone" | "fora_da_regiao" | "site_proprio" | "fechado";
 
 export function normalizar(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -878,6 +811,7 @@ export function selecionarCandidatos(
     sem_telefone: 0,
     fora_da_regiao: 0,
     site_proprio: 0,
+    fechado: 0,
   };
   const nestaBusca = new Set<string>();
   for (const b of brutos) {
@@ -888,6 +822,10 @@ export function selecionarCandidatos(
     nestaBusca.add(b.placeId);
     if (vistos.has(b.placeId)) {
       descartes.ja_visto++;
+      continue;
+    }
+    if (b.fechado) {
+      descartes.fechado++;
       continue;
     }
     if (!b.telefone) {
@@ -932,10 +870,10 @@ git commit -m "feat(prospeccao): convert Apify places and filter candidates"
 **Interfaces:**
 - Consumes: `converterLugar` (Task 5), `selecionarCandidatos` (Task 5), `gerarSlug` (Task 1), `pontuar` (Task 3), nomes de campos de saldo confirmados na Task 4.
 - Produces:
-  - `interface Config { cidades: string[]; uf: string; nichos: Record<string, { termos: string[] }>; limites: { maxPorTermo: number; tetoUsdPorExecucao: number; lotePadrao: number } }`, `carregarConfig(): Config`
-  - `criarArmazem(raiz: string)` → `{ raiz, lerVistos(): Set<string>, salvarVistos(v), listarLeads(): Lead[], salvarLead(l: Lead), removerLead(slug), registrarUso(r: RegistroUso), lerUso(): RegistroUso[], gravarSistema(nome, valor), lerSistema<T>(nome, padrao: T): T }`; `type Armazem`; `interface RegistroUso { quando: string; comando: string; runId: string; gastoUsd: number; lugares: number }`
+  - `interface Config { cidades: string[]; uf: string; nichos: Record<string, { termos: string[] }>; limites: { maxPorTermo: number; tetoUsdPorExecucao: number; lotePadrao: number }; precosUsd: { lugar: number; detalhe: number; avaliacao: number; imagem: number } }`, `carregarConfig(): Config`
+  - `criarArmazem(raiz: string)` → `{ raiz, lerVistos(): Set<string>, salvarVistos(v), listarLeads(): Lead[], salvarLead(l: Lead), removerLead(slug), registrarUso(r: RegistroUso), lerUso(): RegistroUso[], gravarSistema(nome, valor), lerSistema<T>(nome, padrao: T): T }`; `type Armazem`; `interface RegistroUso { quando: string; comando: string; runId: string; gastoEstimadoUsd: number; lugares: number }`
   - `interface Saldo { limiteUsd: number; usadoUsd: number }`, `interface ClienteApify { saldo(): Promise<Saldo>; rodar(input: Record<string, unknown>, tetoUsd: number): Promise<{ runId: string; itens: unknown[] }> }`, `criarClienteApify(token: string, f?: typeof fetch): ClienteApify`
-  - `podeRodar(s: Saldo, tetoUsd: number): boolean`, `mensagemSemSaldo(s: Saldo, tetoUsd: number): string`
+  - `podeRodar(s: Saldo, tetoUsd: number): boolean`, `mensagemSemSaldo(s: Saldo, tetoUsd: number): string`, `TETO_MINIMO_USD = 0.5`, `validarTeto(tetoUsd: number): void` (lança erro abaixo do mínimo)
   - `interface OpcoesBusca { nicho: string; cidade: string; bairro?: string; termos?: string[]; maxPorTermo?: number; tetoUsd?: number }`, `montarEntradaBusca(o, config)`, `executarBusca(o, deps: { cliente: ClienteApify; armazem: Armazem; config: Config; agora: () => Date })` → `{ lugares: number; descartes: Record<MotivoDescarte, number>; novos: Lead[] }`
 
 - [ ] **Step 1: Criar `prospeccao/config.json` e `prospeccao/config.ts`**
@@ -959,7 +897,8 @@ git commit -m "feat(prospeccao): convert Apify places and filter candidates"
       ]
     }
   },
-  "limites": { "maxPorTermo": 40, "tetoUsdPorExecucao": 1.0, "lotePadrao": 25 }
+  "limites": { "maxPorTermo": 40, "tetoUsdPorExecucao": 1.0, "lotePadrao": 25 },
+  "precosUsd": { "lugar": 0.004, "detalhe": 0.002, "avaliacao": 0.0005, "imagem": 0.0005 }
 }
 ```
 
@@ -972,6 +911,7 @@ export interface Config {
   uf: string;
   nichos: Record<string, { termos: string[] }>;
   limites: { maxPorTermo: number; tetoUsdPorExecucao: number; lotePadrao: number };
+  precosUsd: { lugar: number; detalhe: number; avaliacao: number; imagem: number };
 }
 
 export function carregarConfig(): Config {
@@ -994,7 +934,7 @@ export function leadDeTeste(parcial: Partial<Lead> = {}): Lead {
     cidade: "São José",
     bairro: "Kobrasol",
     endereco: "R. A, 1 - Kobrasol, São José - SC",
-    telefone: "(48) 99999-0001",
+    telefone: "+55 48 99999-0001",
     celular: true,
     whatsapp: "https://wa.me/5548999990001",
     instagram: "@x",
@@ -1004,6 +944,7 @@ export function leadDeTeste(parcial: Partial<Lead> = {}): Lead {
     avaliacoes: 80,
     mapsUrl: "https://maps.example/x",
     categoria: "Barbearia",
+    fechado: false,
     slug: "barbearia-x",
     score: 80,
     fase: "candidato",
@@ -1039,8 +980,8 @@ test("vistos e uso persistem", () => {
   assert.deepEqual([...a.lerVistos()], []);
   a.salvarVistos(new Set(["b", "a"]));
   assert.deepEqual([...a.lerVistos()], ["a", "b"]);
-  a.registrarUso({ quando: "t1", comando: "buscar", runId: "r1", gastoUsd: 0.2, lugares: 40 });
-  a.registrarUso({ quando: "t2", comando: "buscar", runId: "r2", gastoUsd: 0.1, lugares: 20 });
+  a.registrarUso({ quando: "t1", comando: "buscar", runId: "r1", gastoEstimadoUsd: 0.2, lugares: 40 });
+  a.registrarUso({ quando: "t2", comando: "buscar", runId: "r2", gastoEstimadoUsd: 0.1, lugares: 20 });
   assert.deepEqual(a.lerUso().map((u) => u.runId), ["r1", "r2"]);
 });
 ```
@@ -1049,7 +990,12 @@ test("vistos e uso persistem", () => {
 ```ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { podeRodar, mensagemSemSaldo } from "./custo.ts";
+import { podeRodar, mensagemSemSaldo, validarTeto } from "./custo.ts";
+
+test("teto abaixo do mínimo da Apify é recusado", () => {
+  assert.throws(() => validarTeto(0.2), /teto mínimo da Apify/);
+  assert.doesNotThrow(() => validarTeto(0.5));
+});
 
 test("só roda se o saldo cobre o teto", () => {
   assert.equal(podeRodar({ limiteUsd: 5, usadoUsd: 1 }, 1), true);
@@ -1130,7 +1076,7 @@ export interface RegistroUso {
   quando: string;
   comando: string;
   runId: string;
-  gastoUsd: number;
+  gastoEstimadoUsd: number;
   lugares: number;
 }
 
@@ -1178,7 +1124,15 @@ export function podeRodar(s: Saldo, tetoUsd: number): boolean {
 
 export function mensagemSemSaldo(s: Saldo, tetoUsd: number): string {
   const resta = Math.max(0, s.limiteUsd - s.usadoUsd);
-  return `Saldo da Apify insuficiente: restam US$${resta.toFixed(2)} e o teto desta execução é US$${tetoUsd.toFixed(2)}. Espere o próximo ciclo mensal ou use um --teto-usd menor.`;
+  return `Saldo da Apify insuficiente: restam US$${resta.toFixed(2)} e o teto desta execução é US$${tetoUsd.toFixed(2)}. Espere o próximo ciclo mensal ou use um --teto-usd menor (mínimo US$${TETO_MINIMO_USD.toFixed(2)}).`;
+}
+
+export const TETO_MINIMO_USD = 0.5;
+
+export function validarTeto(tetoUsd: number): void {
+  if (!(tetoUsd >= TETO_MINIMO_USD)) {
+    throw new Error(`O teto mínimo da Apify por execução é US$${TETO_MINIMO_USD.toFixed(2)} (recebido: ${tetoUsd}).`);
+  }
 }
 ```
 
@@ -1257,6 +1211,7 @@ const config: Config = {
   uf: "Santa Catarina",
   nichos: { barbearia: { termos: ["barbearia"] } },
   limites: { maxPorTermo: 40, tetoUsdPorExecucao: 1, lotePadrao: 25 },
+  precosUsd: { lugar: 0.004, detalhe: 0.002, avaliacao: 0.0005, imagem: 0.0005 },
 };
 const agora = () => new Date("2026-10-09T19:00:00.000Z");
 
@@ -1282,6 +1237,7 @@ test("monta a entrada barata, sem filtro de website", () => {
   assert.equal(e.maxImages, 0);
   assert.equal(e.maxReviews, 0);
   assert.equal("website" in e, false);
+  assert.equal("skipClosedPlaces" in e, false);
 });
 
 test("nicho ou cidade fora da config dão erro", () => {
@@ -1291,7 +1247,7 @@ test("nicho ou cidade fora da config dão erro", () => {
 
 test("grava candidatos, vistos e gasto", async () => {
   const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
-  const { cliente } = clienteFalso([{ limiteUsd: 5, usadoUsd: 1 }, { limiteUsd: 5, usadoUsd: 1.2 }], fixture);
+  const { cliente } = clienteFalso([], fixture);
   const r = await executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente, armazem, config, agora });
   assert.equal(r.lugares, 3);
   assert.deepEqual(r.novos.map((l) => l.slug), ["barbearia-teste-kobrasol", "studio-teste-sobrancelhas"]);
@@ -1299,7 +1255,7 @@ test("grava candidatos, vistos e gasto", async () => {
   assert.equal(armazem.listarLeads().length, 2);
   assert.equal(armazem.lerVistos().size, 3);
   const [uso] = armazem.lerUso();
-  assert.ok(Math.abs(uso.gastoUsd - 0.2) < 1e-9);
+  assert.ok(Math.abs(uso.gastoEstimadoUsd - 3 * 0.004) < 1e-9);
   assert.equal(uso.lugares, 3);
 });
 
@@ -1316,6 +1272,16 @@ test("sem saldo não roda o ator", async () => {
   const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
   const { cliente, rodou } = clienteFalso([{ limiteUsd: 5, usadoUsd: 4.5 }], fixture);
   await assert.rejects(executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente, armazem, config, agora }), /Saldo da Apify insuficiente/);
+  assert.equal(rodou(), 0);
+});
+
+test("teto abaixo de US$0,50 é recusado antes de chamar a Apify", async () => {
+  const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
+  const { cliente, rodou } = clienteFalso([], fixture);
+  await assert.rejects(
+    executarBusca({ nicho: "barbearia", cidade: "São José", tetoUsd: 0.2 }, { cliente, armazem, config, agora }),
+    /teto mínimo/,
+  );
   assert.equal(rodou(), 0);
 });
 
@@ -1345,7 +1311,7 @@ import { converterLugar } from "./doApify.ts";
 import { selecionarCandidatos } from "./filtro.ts";
 import { gerarSlug } from "./slug.ts";
 import { pontuar } from "./pontuacao.ts";
-import { mensagemSemSaldo, podeRodar } from "./custo.ts";
+import { mensagemSemSaldo, podeRodar, validarTeto } from "./custo.ts";
 
 export interface OpcoesBusca {
   nicho: string;
@@ -1367,7 +1333,6 @@ export function montarEntradaBusca(o: OpcoesBusca, config: Config) {
     locationQuery: [o.bairro, o.cidade, config.uf, "Brasil"].filter(Boolean).join(", "),
     maxCrawledPlacesPerSearch: o.maxPorTermo ?? config.limites.maxPorTermo,
     language: "pt-BR",
-    skipClosedPlaces: true,
     scrapePlaceDetailPage: false,
     maxImages: 0,
     maxReviews: 0,
@@ -1380,6 +1345,7 @@ export async function executarBusca(
 ) {
   const entrada = montarEntradaBusca(o, deps.config);
   const teto = o.tetoUsd ?? deps.config.limites.tetoUsdPorExecucao;
+  validarTeto(teto);
   const antes = await deps.cliente.saldo();
   if (!podeRodar(antes, teto)) throw new Error(mensagemSemSaldo(antes, teto));
 
@@ -1400,12 +1366,12 @@ export async function executarBusca(
   for (const b of brutos) vistos.add(b.placeId);
   deps.armazem.salvarVistos(vistos);
 
-  const depois = await deps.cliente.saldo();
+  // Estimativa: a Apify só registra o gasto real alguns minutos depois da execução.
   deps.armazem.registrarUso({
     quando: agoraISO,
     comando: ["buscar", o.nicho, o.cidade, o.bairro].filter(Boolean).join(" "),
     runId,
-    gastoUsd: Math.max(0, depois.usadoUsd - antes.usadoUsd),
+    gastoEstimadoUsd: itens.length * deps.config.precosUsd.lugar,
     lugares: itens.length,
   });
   return { lugares: itens.length, descartes, novos: novos.sort((a, b) => b.score - a.score) };
@@ -1490,7 +1456,7 @@ Expected: todos PASS; `tsc` sem erros.
 
 - [ ] **Step 13: Rodar uma busca real pequena**
 
-Run: `npm run buscar -- --nicho barbearia --cidade "São José" --bairro Kobrasol --max-por-termo 10 --teto-usd 0.2`
+Run: `npm run buscar -- --nicho barbearia --cidade "São José" --bairro Kobrasol --max-por-termo 10 --teto-usd 0.5`
 Expected: linha "N lugares encontrados · M candidatos novos", tabela com os candidatos, arquivos novos em `leads/` e uma entrada em `leads/_sistema/uso.json`.
 
 - [ ] **Step 14: Commit**
@@ -1763,7 +1729,7 @@ import {
 
 const HOJE = "2026-10-13";
 const lead = (p: Record<string, unknown> = {}) => ({
-  slug: "x", nome: "X", nicho: "barbearia", cidade: "São José", telefone: "(48) 99999-0001", score: 50,
+  slug: "x", nome: "X", nicho: "barbearia", cidade: "São José", telefone: "+55 48 99999-0001", score: 50,
   status: "novo", proximoContato: null, historico: [{ status: "novo", em: "2026-10-09T19:00:00.000Z" }],
   plano: null, precoMensal: null, motivoPerda: null, limpo: false, atualizadoEm: "2026-10-09T19:00:00.000Z",
   ...p,
@@ -1973,28 +1939,30 @@ export function contagens(leads, hoje) {
 export const precisaDeMotivo = (status) => status === "perdeu";
 export const precisaDePlano = (status) => PEDEM_PLANO.includes(status);
 
+// Monta o patch num único literal (sem acrescentar propriedades depois):
+// o TypeScript 7 não infere propriedades adicionadas a objetos em arquivos .js.
 export function mudarStatus(lead, novo, agoraISO, extras = {}) {
   if (!STATUS.some((s) => s.id === novo)) throw new Error(`Status desconhecido: ${novo}`);
-  const patch = {
+  let motivoPerda = null;
+  if (precisaDeMotivo(novo)) {
+    if (!MOTIVOS.some((m) => m.id === extras.motivoPerda)) throw new Error("Escolha o motivo da perda.");
+    motivoPerda = extras.motivoPerda;
+  }
+  let plano = null;
+  let precoMensal = null;
+  if (precisaDePlano(novo)) {
+    plano = extras.plano ?? lead.plano;
+    precoMensal = Number(extras.precoMensal ?? lead.precoMensal);
+    if (!PLANOS.some((p) => p.id === plano) || !(precoMensal > 0)) throw new Error("Escolha o plano e o preço oferecidos.");
+  }
+  return {
     status: novo,
     historico: [...(lead.historico ?? []), { status: novo, em: agoraISO }],
     atualizadoEm: agoraISO,
-    motivoPerda: null,
+    motivoPerda,
+    ...(plano ? { plano, precoMensal } : {}),
+    ...(novo === "perdeu" || novo === "fechou" ? { proximoContato: null } : {}),
   };
-  if (precisaDeMotivo(novo)) {
-    if (!MOTIVOS.some((m) => m.id === extras.motivoPerda)) throw new Error("Escolha o motivo da perda.");
-    patch.motivoPerda = extras.motivoPerda;
-    patch.proximoContato = null;
-  }
-  if (precisaDePlano(novo)) {
-    const plano = extras.plano ?? lead.plano;
-    const preco = Number(extras.precoMensal ?? lead.precoMensal);
-    if (!PLANOS.some((p) => p.id === plano) || !(preco > 0)) throw new Error("Escolha o plano e o preço oferecidos.");
-    patch.plano = plano;
-    patch.precoMensal = preco;
-  }
-  if (novo === "fechou") patch.proximoContato = null;
-  return patch;
 }
 
 function ultimaMudanca(l) {
@@ -2912,7 +2880,7 @@ Run:
 npm run buscar -- --nicho barbearia --cidade "São José"
 npm run buscar -- --nicho barbearia --cidade "Florianópolis"
 ```
-Expected: cada uma mostra "N lugares encontrados · M candidatos novos" e a tabela. Se o custo medido na Task 4 indicar mais de US$0,60 por busca de 40 lugares, use `--max-por-termo 25`.
+Expected: cada uma mostra "N lugares encontrados · M candidatos novos" e a tabela. Cada busca de 40 lugares custa cerca de US$0,16 (preços em `prospeccao/apify-notas.md`).
 
 - [ ] **Step 2: Buscar estéticas em São José**
 
@@ -2921,8 +2889,8 @@ Expected: mesma saída.
 
 - [ ] **Step 3: Conferir o gasto acumulado**
 
-Run: `node --input-type=module -e 'const u = JSON.parse((await import("node:fs")).readFileSync("leads/_sistema/uso.json","utf8")); console.log(u.length, "execuções · US$", u.reduce((s, x) => s + x.gastoUsd, 0).toFixed(2))'`
-Expected: total abaixo de US$2,00. Acima disso, pare e mostre os números para a pessoa antes de seguir.
+Run: `node --input-type=module -e 'const u = JSON.parse((await import("node:fs")).readFileSync("leads/_sistema/uso.json","utf8")); console.log(u.length, "execuções · US$", u.reduce((s, x) => s + x.gastoEstimadoUsd, 0).toFixed(2))'`
+Expected: total estimado perto de US$0,40. Acima de US$1,50, pare e mostre os números para a pessoa antes de seguir.
 
 - [ ] **Step 4: Montar o lote**
 
@@ -2951,7 +2919,7 @@ Alimenta as prévias do Plano B. Não bloqueia as ligações.
 - Test: `prospeccao/doApify.test.ts` (acrescenta testes), `prospeccao/fotos.test.ts`, `prospeccao/detalhar.test.ts`
 
 **Interfaces:**
-- Consumes: `texto`, `numero` (Task 5), `ClienteApify`, `Armazem`, `Config`, `podeRodar`, `mensagemSemSaldo` (Task 6), `leadDeTeste` (Task 6), forma de pedir detalhes confirmada na Task 4.
+- Consumes: `texto`, `numero` (Task 5), `ClienteApify`, `Armazem`, `Config`, `podeRodar`, `mensagemSemSaldo`, `validarTeto` (Task 6), `leadDeTeste` (Task 6), forma de pedir detalhes confirmada na Task 4.
 - Produces:
   - `interface DetalhesBrutos { placeId: string; horarios: { dia: string; horas: string }[]; coordenadas: { lat: number; lng: number } | null; reviews: { autor: string; texto: string; nota: number }[]; imagens: string[] }`, `converterDetalhes(raw: unknown): DetalhesBrutos | null`
   - `urlEmAltaResolucao(url: string): string`, `baixarFotos(urls: string[], destinoRelativo: string, raiz: string, f?: typeof fetch): Promise<string[]>`
@@ -2968,7 +2936,7 @@ test("converte detalhes: horários, coordenadas, avaliações com texto e imagen
   const d = converterDetalhes(detalhe);
   assert.ok(d);
   assert.equal(d.placeId, "ChIJteste000000000000001");
-  assert.deepEqual(d.horarios[1], { dia: "terça-feira", horas: "09:00 a 19:00" });
+  assert.deepEqual(d.horarios[1], { dia: "terça-feira", horas: "09:00 to 19:00" });
   assert.deepEqual(d.coordenadas, { lat: -27.5969, lng: -48.6167 });
   assert.deepEqual(d.reviews.map((r) => r.autor), ["Cliente Um", "Cliente Três"]);
   assert.equal(d.reviews[0].nota, 5);
@@ -3030,6 +2998,7 @@ const detalhe = JSON.parse(readFileSync(new URL("./fixtures/lugar-detalhe.json",
 const config: Config = {
   cidades: ["São José"], uf: "Santa Catarina", nichos: { barbearia: { termos: ["barbearia"] } },
   limites: { maxPorTermo: 40, tetoUsdPorExecucao: 1, lotePadrao: 25 },
+  precosUsd: { lugar: 0.004, detalhe: 0.002, avaliacao: 0.0005, imagem: 0.0005 },
 };
 
 test("entrada pede página de detalhe, 4 fotos e 5 avaliações", () => {
@@ -3060,6 +3029,7 @@ test("detalha só o lote; quem não voltou continua no lote", async () => {
   assert.equal(um?.detalhes?.reviews.length, 2);
   assert.equal(armazem.listarLeads().find((l) => l.slug === "dois")?.fase, "lote");
   assert.equal(armazem.lerUso()[0].comando, "detalhar");
+  assert.ok(Math.abs(armazem.lerUso()[0].gastoEstimadoUsd - (0.006 + 2 * 0.0005 + 2 * 0.0005)) < 1e-9);
 });
 
 test("sem lote, não chama a Apify", async () => {
@@ -3171,7 +3141,7 @@ import type { ClienteApify } from "./apify.ts";
 import type { Armazem } from "./armazem.ts";
 import type { Config } from "./config.ts";
 import { converterDetalhes } from "./doApify.ts";
-import { mensagemSemSaldo, podeRodar } from "./custo.ts";
+import { mensagemSemSaldo, podeRodar, validarTeto } from "./custo.ts";
 
 export function montarEntradaDetalhes(placeIds: string[]) {
   return {
@@ -3202,16 +3172,13 @@ export async function executarDetalhes(
   if (alvo.length === 0) return { detalhados: [] as string[], semDados: [] as string[] };
 
   const teto = o.tetoUsd ?? deps.config.limites.tetoUsdPorExecucao;
+  validarTeto(teto);
   const antes = await deps.cliente.saldo();
   if (!podeRodar(antes, teto)) throw new Error(mensagemSemSaldo(antes, teto));
   const { runId, itens } = await deps.cliente.rodar(montarEntradaDetalhes(alvo.map((l) => l.placeId)), teto);
 
-  const porId = new Map(
-    itens
-      .map((i) => converterDetalhes(i))
-      .filter((d) => d !== null)
-      .map((d) => [d.placeId, d] as const),
-  );
+  const detalhes = itens.map((i) => converterDetalhes(i)).filter((d) => d !== null);
+  const porId = new Map(detalhes.map((d) => [d.placeId, d] as const));
   const agoraISO = deps.agora().toISOString();
   const detalhados: string[] = [];
   const semDados: string[] = [];
@@ -3230,12 +3197,15 @@ export async function executarDetalhes(
     detalhados.push(l.slug);
   }
 
-  const depois = await deps.cliente.saldo();
+  // Estimativa: a Apify só registra o gasto real alguns minutos depois da execução.
+  const p = deps.config.precosUsd;
   deps.armazem.registrarUso({
     quando: agoraISO,
     comando: "detalhar",
     runId,
-    gastoUsd: Math.max(0, depois.usadoUsd - antes.usadoUsd),
+    gastoEstimadoUsd:
+      itens.length * (p.lugar + p.detalhe) +
+      detalhes.reduce((s, d) => s + d.reviews.length * p.avaliacao + d.imagens.length * p.imagem, 0),
     lugares: itens.length,
   });
   return { detalhados, semDados };

@@ -1,6 +1,6 @@
 # Cold call de sites — Design
 
-Data: 2026-10-09 · Status: aprovada · Rev. 3: oferta pesquisada, fonte de leads Apify
+Data: 2026-10-09 · Status: aprovada · Rev. 4: ajustes confirmados no dry-run da Apify
 
 ## 1. Objetivo
 
@@ -88,7 +88,7 @@ Fluxo:
 
 - Ator `compass/crawler-google-places` da Apify, chamado pelo cliente oficial `apify-client`.
 - Uma execução por nicho × local: termos do nicho em `searchStringsArray`, local `"<bairro>, <cidade>, Santa Catarina, Brasil"`, idioma pt-BR, fechados ignorados.
-- Modo barato: **sem** página de detalhe, **sem** fotos, **sem** avaliações, com limite de lugares por busca.
+- Modo barato: **sem** página de detalhe, **sem** fotos, **sem** avaliações e **sem** filtros pagos do ator (o `skipClosedPlaces` custa +US$0,001 por lugar), com limite de lugares por busca.
 - Campos usados: placeId, nome, endereço, bairro, cidade, telefone, site, nota, nº de avaliações, categoria, link do Maps.
 - Termos por nicho e bairros por cidade ficam em `prospeccao/config.json`.
 - Duplicados são removidos pelo placeId. IDs já vistos ficam em `leads/vistos.json` e não voltam.
@@ -98,7 +98,7 @@ Fluxo:
 ### 5.2 Filtro
 
 - O filtro "sem site" do próprio ator **não** é usado: ele descartaria quem tem só Instagram, que é lead quente.
-- Descarta: sem telefone.
+- Descarta: sem telefone; fechado temporária ou definitivamente.
 - Classifica o campo "site":
   - vazio → `sem_site`
   - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site) → `so_rede`
@@ -125,9 +125,9 @@ O lote = os N leads de maior pontuação (padrão 25).
 ### 5.5 Controle de custo
 
 - Plano grátis da Apify: US$5 de crédito por mês, sem cartão. Quando acaba, as execuções param até o mês seguinte. Não existe cobrança extra.
-- Estimativa (conferida na busca teste): descoberta de ~80 lugares + detalhes de 25 leads ≈ US$0,50–1,00 por lote. O crédito grátis rende vários lotes por mês.
-- O script define um teto de gasto por execução (configurável) e consulta o uso do mês antes de rodar. Se não houver saldo para a execução, avisa e não roda.
-- Cada execução registra o gasto em `leads/uso.json`.
+- Custo conferido no dry-run de 2026-10-09: ≈ US$0,58 por lote (descoberta de ~80 lugares + detalhes de 25 leads). O crédito grátis rende uns 8 lotes por mês. Detalhes em `prospeccao/apify-notas.md`.
+- O script define um teto de gasto por execução (configurável; a Apify exige no mínimo US$0,50) e consulta o uso do mês antes de rodar. Se não houver saldo para a execução, avisa e não roda.
+- Cada execução registra o gasto estimado (quantidades × preços) em `leads/_sistema/uso.json`, porque a Apify registra o gasto real com atraso.
 
 ### 5.6 Formato do lead (`leads/<slug>.json`)
 
