@@ -1,6 +1,6 @@
 # Cold call de sites — Design
 
-Data: 2026-10-09 · Status: aguardando revisão · Rev. 2: fonte de leads trocada para Apify
+Data: 2026-10-09 · Status: aprovada · Rev. 3: oferta pesquisada, fonte de leads Apify
 
 ## 1. Objetivo
 
@@ -29,10 +29,22 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 | Design | Skill `frontend-design` (direção visual) + skills do Emil Kowalski em `.claude/skills/` (commit `e8a175d`, licença MIT) para acabamento, movimento, mobile e casos extremos. |
 | Ordem | Plano A (prospecção + painel) → Plano B (gerador de sites + agenda). Cada plano tem implementação própria. |
 
-### Oferta (proposta para o roteiro — ajuste à vontade)
+### Oferta (pesquisada em 2026-10-09)
 
-- **Implantação:** R$790 à vista ou 3× R$290. Inclui site one-page, agenda online, domínio `.com.br` registrado em nome do cliente e perfil do Google ligado ao site.
-- **Mensalidade:** R$99. Inclui hospedagem, renovação do domínio, agenda e até 2 alterações pequenas por mês.
+Meta: o maior preço que ainda fecha com ~90% dos interessados.
+
+Referências: agenda sozinha custa R$30–110/mês (AppBarber R$79,90 para 1 profissional e R$109,90 para 2–5; Simples Agenda e GENDA a partir de R$39,90; Navalha R$49,90–149,90 + implantação). One-page com freelancer custa R$500–2.500 + R$50–500/mês de manutenção. Corte na Grande Florianópolis custa R$35–80.
+
+| Plano | Profissionais | Mensal | Anual (paga 10 meses) |
+|---|---|---|---|
+| Solo | 1 | R$59 | R$590 |
+| Equipe | 2–5 | R$89 | R$890 |
+| Casa cheia | 6+ | R$129 | R$1.290 |
+
+- Inclui: site one-page personalizado, agenda online por profissional, domínio `.com.br` em nome do cliente, hospedagem, perfil do Google ligado ao site, até 2 alterações pequenas por mês.
+- Sem taxa de implantação e sem fidelidade; o 1º mês é pago na contratação. Pagamento antecipado é a maior barreira para fechar com MEI.
+- Argumentos: custa menos que um app só de agenda e ainda inclui site e domínio; um corte a mais por mês paga o plano.
+- Os 90% são estimativa, porque não há dado público de disposição a pagar. Ajuste pelo painel (5.8): a cada 10 interessados, se nenhum recusou por preço, os próximos recebem a tabela +R$10; se 2 ou mais recusaram, −R$10.
 
 ## 3. Fora do escopo da v1
 
@@ -137,6 +149,9 @@ Os dados vêm de página pública do Google Maps, coletada por terceiro (risco n
 - Lista ordenada por próxima ação e pontuação, com filtros por status, nicho e cidade.
 - Cartão do lead: nome, nicho, bairro, nota (nº de avaliações), pontuação; botões Ligar (`tel:`), WhatsApp, Instagram, Maps e Prévia; status; data do próximo contato; notas com salvamento automático; histórico de mudanças de status.
 - Status: novo → sem resposta → retornar → interessado → reunião → fechou / perdeu.
+- Plano e preço oferecidos ficam registrados no lead.
+- Ao marcar "perdeu", escolha obrigatória do motivo: preço, não vê necessidade, já tem sistema, não decide sozinho, outro.
+- Indicador de preço: quantos dos últimos 10 interessados recusaram por preço, com a sugestão de subir ou descer a tabela (seção 2, Oferta).
 - Aba "Roteiro": roteiro de ligação, respostas para objeções comuns e a oferta da seção 2.
 
 ## 6. Plano B — Gerador de sites + agenda
