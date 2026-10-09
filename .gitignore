@@ -1,0 +1,7 @@
+.env
+node_modules/
+leads/
+sites/public/fotos/
+dist/
+.astro/
+.DS_Store
