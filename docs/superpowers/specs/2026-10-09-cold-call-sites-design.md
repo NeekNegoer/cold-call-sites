@@ -1,6 +1,6 @@
 # Cold call de sites — Design
 
-Data: 2026-10-09 · Status: aguardando revisão
+Data: 2026-10-09 · Status: aguardando revisão · Rev. 2: fonte de leads trocada para Apify
 
 ## 1. Objetivo
 
@@ -17,7 +17,7 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 | Região | Grande Florianópolis: Florianópolis, São José, Palhoça, Biguaçu. Expandir depois. |
 | Nichos v1 | Barbearia; estética (sobrancelha, cílios, unhas, depilação, harmonização, salão de beleza). |
 | Público-alvo v1 | Negócios sem site, ou cujo "site" no Google é rede social, link de bio ou app de agenda. |
-| Fonte de leads | Google Places API (New). |
+| Fonte de leads | Google Maps via Apify (ator "Google Maps Scraper", plano grátis, sem cartão). A API oficial do Google foi descartada porque exige pré-pagamento de R$200. |
 | Gestão de leads | Painel privado no claude.ai (mini-CRM), usado no celular. |
 | Prévia | Todo lead ganha prévia personalizada (template base + ficha por lead). Interessados ganham versão caprichada. |
 | Agenda | Google Agenda (uma agenda por profissional) + Google Apps Script. Sem banco SQL, sem servidor. |
@@ -40,7 +40,7 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 - Agendamento via WhatsApp, lembretes automáticos por WhatsApp, sinal via PIX.
 - Reservas de restaurante. O motor fica preparado para um "modo capacidade", implementado quando surgir o primeiro restaurante.
 - Site ou marca próprios de quem vende.
-- Coleta automática no Instagram (viola os termos). O @ entra só quando o Google informa.
+- Coleta automática no Instagram (viola os termos). O @ entra só quando aparece como site no Google Maps.
 - Sites com várias páginas.
 - Dono editar a própria configuração da agenda. Mudanças passam por você e fazem parte da mensalidade.
 
@@ -48,8 +48,8 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 
 ```
 .cold/
-├── prospeccao/          Plano A — busca, filtro, pontuação, detalhes
-├── leads/               (fora do git) 1 JSON por lead + IDs vistos + uso da API
+├── prospeccao/          Plano A — busca (Apify), filtro, pontuação, detalhes
+├── leads/               (fora do git) 1 JSON por lead + IDs vistos + gasto
 ├── sites/               Plano B — projeto Astro
 │   ├── src/fichas/      1 ficha JSON por site (prévia ou final)
 │   ├── src/layouts/     variações por nicho
@@ -63,26 +63,30 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 
 Fluxo:
 
-1. `npm run buscar` consulta o Places, filtra, pontua e grava os leads em `leads/`.
+1. `npm run buscar` busca no Google Maps via Apify, filtra, pontua e grava os leads em `leads/`.
 2. Claude envia o lote para o painel.
-3. Claude busca os detalhes do lote (avaliações, fotos) e escreve uma ficha por lead.
+3. `npm run detalhar` busca avaliações, fotos e horário do lote; Claude escreve uma ficha por lead.
 4. `npm run build` gera os sites e `npm run publicar` envia as prévias ao Cloudflare Pages.
 5. O link de cada prévia aparece no painel. Você liga.
 6. Fechou: Claude refina a ficha com material do cliente, publica o site final no domínio dele e cadastra o negócio na agenda.
 
 ## 5. Plano A — Prospecção
 
-### 5.1 Busca
+### 5.1 Busca (descoberta)
 
-- Places API (New), Text Search. Consulta = `"<termo> <bairro> <cidade> SC"`, idioma pt-BR, região BR, até 3 páginas (60 resultados) por consulta.
-- Termos por nicho e bairros por cidade ficam em `prospeccao/config.json`. Dividir por bairro contorna o limite de 60 resultados.
-- Campos pedidos: id, nome, endereço, telefone, site, nota, nº de avaliações, status do negócio, link do Maps, tipo principal.
-- Duplicados são removidos pelo place ID. IDs já vistos ficam em `leads/vistos.json` e não voltam.
+- Ator `compass/crawler-google-places` da Apify, chamado pelo cliente oficial `apify-client`.
+- Uma execução por nicho × local: termos do nicho em `searchStringsArray`, local `"<bairro>, <cidade>, Santa Catarina, Brasil"`, idioma pt-BR, fechados ignorados.
+- Modo barato: **sem** página de detalhe, **sem** fotos, **sem** avaliações, com limite de lugares por busca.
+- Campos usados: placeId, nome, endereço, bairro, cidade, telefone, site, nota, nº de avaliações, categoria, link do Maps.
+- Termos por nicho e bairros por cidade ficam em `prospeccao/config.json`.
+- Duplicados são removidos pelo placeId. IDs já vistos ficam em `leads/vistos.json` e não voltam.
 - Endereços fora das 4 cidades são descartados.
+- **Isolamento:** o módulo da Apify só converte o resultado para o formato de lead (5.6). Trocar de fonte (ex.: API oficial do Google) não mexe em filtro, pontuação, painel nem sites.
 
 ### 5.2 Filtro
 
-- Descarta: status diferente de `OPERATIONAL`; sem telefone.
+- O filtro "sem site" do próprio ator **não** é usado: ele descartaria quem tem só Instagram, que é lead quente.
+- Descarta: sem telefone.
 - Classifica o campo "site":
   - vazio → `sem_site`
   - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site) → `so_rede`
@@ -102,14 +106,16 @@ O lote = os N leads de maior pontuação (padrão 25).
 
 ### 5.4 Detalhes (só do lote)
 
-- Place Details: horário de funcionamento, coordenadas, até 5 avaliações, referências de fotos.
-- Até 4 fotos por lead (largura 1200 px) baixadas para `sites/public/fotos/<slug>/`, com o crédito de autoria exigido pelo Google.
+- Segunda execução do ator só com os placeIds do lote, com página de detalhe: horário de funcionamento, coordenadas, até 5 avaliações, até 4 fotos.
+- Fotos baixadas para `sites/public/fotos/<slug>/` (as URLs do Google podem expirar).
+- Fotos do Google aparecem só na prévia privada, com a legenda "Fotos: Google Maps". O site final usa fotos do cliente.
 
 ### 5.5 Controle de custo
 
-- `leads/uso.json` conta as chamadas por mês e por tipo (busca, detalhes, foto).
-- Os limites mensais ficam em config, abaixo da cota grátis, e o script recusa rodar se for ultrapassar. Os valores são conferidos com a tabela de preços atual do Google no início da implementação.
-- Na conta Google Cloud: chave restrita à Places API (New) e alerta de orçamento.
+- Plano grátis da Apify: US$5 de crédito por mês, sem cartão. Quando acaba, as execuções param até o mês seguinte. Não existe cobrança extra.
+- Estimativa (conferida na busca teste): descoberta de ~80 lugares + detalhes de 25 leads ≈ US$0,50–1,00 por lote. O crédito grátis rende vários lotes por mês.
+- O script define um teto de gasto por execução (configurável) e consulta o uso do mês antes de rodar. Se não houver saldo para a execução, avisa e não roda.
+- Cada execução registra o gasto em `leads/uso.json`.
 
 ### 5.6 Formato do lead (`leads/<slug>.json`)
 
@@ -117,12 +123,11 @@ O lote = os N leads de maior pontuação (padrão 25).
 
 Slug: nome em minúsculas, sem acento, hifenizado. Em caso de colisão, recebe sufixo numérico.
 
-### 5.7 Retenção de dados do Google
+### 5.7 Retenção de dados
 
-Os termos do Google só permitem guardar o place ID por tempo indefinido; o resto do conteúdo não deveria ficar armazenado. Mitigação adotada, com risco residual aceito:
+Os dados vêm de página pública do Google Maps, coletada por terceiro (risco na seção 10). Para minimizar dados pessoais (LGPD):
 
-- Dados do Google são tratados como cache de trabalho curto.
-- `npm run limpar` apaga JSON e fotos de leads em status `perdeu`, ou em `novo`/`sem resposta` sem mudança há mais de 14 dias, e limpa os campos do Google desses leads no painel. Ficam o place ID e as suas anotações.
+- `npm run limpar` apaga JSON e fotos de leads em status `perdeu`, ou em `novo`/`sem resposta` sem mudança há mais de 14 dias, e limpa os campos coletados desses leads no painel. Ficam o placeId e as suas anotações.
 - O que você levanta na ligação (nome do dono, interesse, contato confirmado) é seu.
 - Lead fechado passa a usar dados e fotos fornecidos pelo próprio cliente.
 
@@ -146,7 +151,7 @@ Validada por schema no build: ficha inválida faz o build falhar com mensagem cl
 - `servicos[]`: nome, duração (min), preço opcional. Prévias nunca inventam preço.
 - `profissionais[]`: nome, foto opcional, id da agenda
 - `depoimentos[]`: autor, texto, nota
-- `fotos[]`: arquivo, alt, crédito
+- `fotos[]`: arquivo, alt, legenda
 - `contato`: telefone, whatsapp, instagram, endereço, mapsUrl, horários por dia da semana
 - `agenda`: id do negócio no motor (`demo` nas prévias)
 
@@ -163,7 +168,7 @@ Validada por schema no build: ficha inválida faz o build falhar com mensagem cl
 3. Serviços
 4. Equipe (some se não houver profissionais nomeados)
 5. Depoimentos
-6. Galeria (com créditos das fotos)
+6. Galeria
 7. Localização e horário (endereço, botão "Como chegar")
 8. Rodapé: Instagram, WhatsApp (contato), link de privacidade
 
@@ -198,31 +203,31 @@ Mais uma página `/privacidade` (LGPD) gerada pelo template.
 
 ## 7. Testes e verificação
 
-- Funções puras com testes (Node test runner, TDD): classificação de site, pontuação, slug, extração do @, cálculo de horários livres, validação de celular.
-- Busca real pequena (1 termo, 1 bairro) antes do primeiro lote completo.
+- Funções puras com testes (Node test runner, TDD): classificação de site, pontuação, slug, extração do @, conversão do resultado da Apify para lead, cálculo de horários livres, validação de celular.
+- Busca teste pequena (1 termo, 1 bairro, até 10 lugares) antes do primeiro lote: confirma quais campos vêm sem página de detalhe e o custo real por lugar.
 - Ficha "pior caso" (nome enorme, sem fotos, 1 avaliação, sem horário) renderizada em todas as variações, com a skill `break-ui`.
 - Baseline da skill `mobile-native` obrigatório; verificação visual em 390 px com Playwright.
 - Agenda ponta a ponta na demo: agendar → horário some → conflito simultâneo é recusado → limpeza diária apaga.
 
 ## 8. Segurança e privacidade
 
-- Chave do Places em `.env` (fora do git), restrita à Places API (New).
+- Token da Apify em `.env` (fora do git).
 - `leads/` e `sites/public/fotos/` fora do git.
 - Conta de operação com verificação em duas etapas.
-- Prévias: faixa de prévia, `noindex`, links com sufixo aleatório, créditos das fotos, remoção quando o lead fecha ou é perdido.
+- Prévias: faixa de prévia, `noindex`, links com sufixo aleatório, remoção quando o lead fecha ou é perdido.
 - LGPD: página de privacidade em todo site com agenda; coleta mínima (nome, celular, e-mail opcional); dados ficam nas agendas do cliente; você atua como operador dos dados.
 
 ## 9. Contas e setup (você)
 
 | Conta | Para quê | Quando |
 |---|---|---|
-| Google Cloud (com cartão) | Places API | Plano A |
+| Apify (grátis, sem cartão) | Busca de leads | Plano A |
 | Gmail de operação | Demo + motor da agenda | Plano B |
 | Cloudflare | Hospedagem das prévias e sites | Plano B |
 
 ## 10. Riscos conhecidos
 
-- Termos do Google sobre armazenamento (seção 5.7): risco residual aceito.
-- Preços e cotas do Google mudam: limites no script + alerta de orçamento.
+- **Raspagem:** a Apify coleta páginas públicas do Google Maps, e os termos do Google proíbem raspagem. O risco recai principalmente sobre a Apify; para você, com uso comercial pontual de dados públicos de empresas, o risco prático é baixo. Saída limpa disponível: API oficial (pré-pagamento de R$200, reembolsável), trocando só o módulo de busca (5.1).
+- Preço ou funcionamento do ator podem mudar: teto de gasto por execução, busca teste e módulo isolado.
 - Cotas do Apps Script em conta gratuita: suficientes para dezenas de negócios pequenos. Reavaliar com escala (Google Workspace ou Cloudflare Workers).
 - Conta de operação é ponto único de falha: 2FA obrigatório; se ela cair, todas as agendas param.
