@@ -101,7 +101,7 @@ Fluxo:
 - Descarta: sem telefone; fechado temporária ou definitivamente.
 - Classifica o campo "site":
   - vazio → `sem_site`
-  - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br) → `so_rede`
+  - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br, calendly.com, gendo.app, biolink.info) → `so_rede`
   - qualquer outro → `site_proprio`, descartado na v1
 - Se o site for instagram.com, extrai o @.
 

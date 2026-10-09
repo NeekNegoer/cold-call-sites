@@ -15,6 +15,9 @@ const REDES = [
   "business.site",
   "appbarber.com.br",
   "cashbarber.com.br",
+  "calendly.com",
+  "gendo.app",
+  "biolink.info",
 ];
 
 const CAMINHOS_INSTAGRAM_SEM_PERFIL = ["p", "reel", "reels", "explore", "stories", "accounts", "tv"];

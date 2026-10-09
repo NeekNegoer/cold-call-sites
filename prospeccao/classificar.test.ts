@@ -40,8 +40,14 @@ test("redes, links de bio e apps de agenda são so_rede", () => {
   }
 });
 
-test("apps de agenda achados na busca real (AppBarber, Cash Barber) são so_rede", () => {
-  for (const url of ["https://sites.appbarber.com.br/barbeariadoze", "https://cashbarber.com.br/barbeariadoze"]) {
+test("apps de agenda e links de bio achados nas buscas reais são so_rede", () => {
+  for (const url of [
+    "https://sites.appbarber.com.br/barbeariadoze",
+    "https://cashbarber.com.br/barbeariadoze",
+    "https://calendly.com/barbeariadoze",
+    "https://barbeariadoze.gendo.app/",
+    "https://biolink.info/barbeariadoze",
+  ]) {
     assert.equal(classificarSite(url).classificacao, "so_rede", url);
   }
 });
