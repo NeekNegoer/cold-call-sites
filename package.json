@@ -1,0 +1,20 @@
+{
+  "name": "cold",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"prospeccao/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "buscar": "node --env-file-if-exists=.env prospeccao/cli/buscar.ts",
+    "lote": "node prospeccao/cli/lote.ts",
+    "detalhar": "node --env-file-if-exists=.env prospeccao/cli/detalhar.ts",
+    "limpar": "node prospeccao/cli/limpar.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}
