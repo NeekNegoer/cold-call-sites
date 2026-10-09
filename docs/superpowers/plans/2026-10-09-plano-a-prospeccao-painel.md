@@ -2891,7 +2891,7 @@ Carregue o `ArtifactData` (`ToolSearch` com `select:ArtifactData`). Faça um `se
 
 - [ ] **Step 12: Registrar a URL do painel**
 
-Acrescente em `/Users/pietrojustino/.claude/projects/-Users-pietrojustino-Documents--cold/memory/cold-call-sites-project.md` a linha: `- Painel (Caderno de Ligações): <URL do Step 9> — coleção leads (id = slug), doc config/oferta.`
+Acrescente na memória deste projeto no Claude Code (arquivo `cold-call-sites-project.md`) a linha: `- Painel (Caderno de Ligações): <URL do Step 9> — coleção leads (id = slug), doc config/oferta.`
 
 ---
 
