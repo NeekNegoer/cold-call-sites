@@ -1,0 +1,728 @@
+<title>Caderno de Ligações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;800&display=swap">
+<style>
+/* Layout: coluna única para o polegar — resumo, filtros, cartões que abrem no lugar; aba Roteiro à parte */
+:root {
+  --bg: #f2f4f6;
+  --surface: #ffffff;
+  --ink: #16212c;
+  --muted: #586572;
+  --line: #d6dce3;
+  --chip: #e6eaef;
+  --accent: #1d5bb8;
+  --accent-ink: #ffffff;
+  --call: #11724a;
+  --call-ink: #ffffff;
+  --st-novo: #586572;
+  --st-sem: #8a5a00;
+  --st-retornar: #1d5bb8;
+  --st-neg: #7440b0;
+  --st-fechou: #11724a;
+  --st-perdeu: #b0261d;
+  --font-ui: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --raio: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #17212a; --ink: #e6edf3; --muted: #97a4b1; --line: #28343f; --chip: #1f2a35;
+    --accent: #6ea6ff; --accent-ink: #0f151b; --call: #49c98a; --call-ink: #0f151b;
+    --st-novo: #97a4b1; --st-sem: #e2aa4c; --st-retornar: #6ea6ff; --st-neg: #b98ff0; --st-fechou: #49c98a; --st-perdeu: #f28479;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #17212a; --ink: #e6edf3; --muted: #97a4b1; --line: #28343f; --chip: #1f2a35;
+  --accent: #6ea6ff; --accent-ink: #0f151b; --call: #49c98a; --call-ink: #0f151b;
+  --st-novo: #97a4b1; --st-sem: #e2aa4c; --st-retornar: #6ea6ff; --st-neg: #b98ff0; --st-fechou: #49c98a; --st-perdeu: #f28479;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.45;
+  padding-inline: 16px; padding-block: 0 56px; -webkit-tap-highlight-color: transparent;
+}
+.casca { max-width: 720px; margin-inline: auto; display: grid; gap: 14px; }
+.topo {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding-block: 12px 10px; border-bottom: 1px solid var(--line);
+}
+h1 { margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { margin: 0; font-size: 1.05rem; font-weight: 800; text-wrap: balance; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; transition: transform 120ms ease-out; }
+button:active { transform: scale(0.97); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.abas { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--chip); }
+.abas button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font-weight: 600; color: var(--muted); }
+.abas button[aria-selected="true"] { background: var(--surface); color: var(--ink); }
+.resumo { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.resumo div { display: grid; gap: 2px; }
+.resumo .num { font-family: var(--font-num); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.resumo .rot { font-size: 0.78rem; color: var(--muted); }
+.filtros { display: grid; gap: 8px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chips button { flex: none; border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 999px; font-size: 0.9rem; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+select, input[type="date"], input[type="number"], textarea {
+  width: 100%; min-width: 0; font-size: 16px; padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--surface);
+}
+textarea { resize: vertical; min-height: 4.5em; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.estado { margin: 0; padding: 24px 16px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--raio); }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lead { background: var(--surface); border: 1px solid var(--line); border-radius: var(--raio); overflow: hidden; }
+.lead-cabeca {
+  display: grid; gap: 4px; width: 100%; text-align: left; border: 0; background: transparent; padding: 12px 14px;
+  transition: none;
+}
+.lead-cabeca:active { transform: none; background: var(--chip); }
+.lead-linha1 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.lead-nome { font-weight: 800; font-size: 1.02rem; min-width: 0; overflow-wrap: anywhere; }
+.lead-linha2, .lead-linha3 { color: var(--muted); font-size: 0.88rem; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.score, .nota { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.prox[data-vencido="true"] { color: var(--st-sem); font-weight: 600; }
+.pilula { --pill: var(--st-novo); flex: none; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; color: var(--pill); background: color-mix(in srgb, var(--pill) 14%, transparent); }
+.pilula[data-status="sem_resposta"] { --pill: var(--st-sem); }
+.pilula[data-status="retornar"] { --pill: var(--st-retornar); }
+.pilula[data-status="interessado"], .pilula[data-status="reuniao"] { --pill: var(--st-neg); }
+.pilula[data-status="fechou"] { --pill: var(--st-fechou); }
+.pilula[data-status="perdeu"] { --pill: var(--st-perdeu); }
+.lead-corpo { display: grid; gap: 14px; padding: 4px 14px 16px; border-top: 1px solid var(--line); }
+.fone-linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 10px; }
+.fone { font-family: var(--font-num); font-size: 1.35rem; font-weight: 600; font-variant-numeric: tabular-nums; user-select: all; -webkit-user-select: all; }
+.acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.acao, .botao, .botao-sec {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 14px;
+  border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.acao.ligar { background: var(--call); border-color: var(--call); color: var(--call-ink); }
+.botao { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.endereco { margin: 0; color: var(--muted); font-size: 0.9rem; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; padding: 0; margin-bottom: 6px; }
+.status-botoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.status-botoes button { border: 1px solid var(--line); background: var(--surface); padding: 6px 10px; border-radius: 8px; font-size: 0.9rem; }
+.status-botoes button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.painel-extra { display: grid; gap: 10px; padding: 12px; border-radius: 8px; background: var(--chip); }
+.opcao { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.campo { display: grid; min-width: 0; }
+.linha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.linha input[type="date"] { flex: 1 1 160px; width: auto; }
+.plano-atual { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.92rem; }
+.salvo { font-size: 0.8rem; color: var(--muted); min-height: 1.2em; }
+.historico summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.historico ol { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; }
+.roteiro { display: grid; gap: 18px; }
+.bloco { background: var(--surface); border: 1px solid var(--line); border-radius: var(--raio); padding: 14px; display: grid; gap: 10px; }
+.bloco p, .bloco ul, .bloco ol { margin: 0; max-width: 65ch; }
+.bloco ul, .bloco ol { padding-left: 20px; display: grid; gap: 6px; }
+.fala { border-left: 3px solid var(--accent); padding-left: 10px; }
+.tabela { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tabela label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.indicador { display: grid; gap: 6px; }
+.indicador .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; }
+.aviso {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  max-width: calc(100% - 32px); padding: 10px 14px; border-radius: 8px; background: var(--ink); color: var(--bg);
+  font-weight: 600; box-shadow: 0 6px 24px color-mix(in srgb, var(--ink) 25%, transparent); z-index: 5;
+}
+.aviso[data-tipo="erro"] { background: var(--st-perdeu); color: var(--accent-ink); }
+@media (hover: hover) {
+  .acao:hover, .botao-sec:hover, .chips button:hover { border-color: var(--muted); }
+  .lead-cabeca:hover { background: color-mix(in srgb, var(--chip) 60%, transparent); }
+}
+@media (max-width: 420px) {
+  .resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tabela { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+
+<div class="casca">
+  <header class="topo">
+    <h1>Caderno de Ligações</h1>
+    <div class="abas" role="tablist" aria-label="Seções">
+      <button type="button" role="tab" id="aba-leads" data-aba="leads" aria-controls="vista-leads">Leads</button>
+      <button type="button" role="tab" id="aba-roteiro" data-aba="roteiro" aria-controls="vista-roteiro">Roteiro</button>
+    </div>
+  </header>
+
+  <main id="vista-leads" class="casca" role="tabpanel" aria-labelledby="aba-leads">
+    <section class="resumo" aria-label="Resumo do dia">
+      <div><span class="num" id="n-ligar">0</span><span class="rot">para ligar</span></div>
+      <div><span class="num" id="n-vencidos">0</span><span class="rot">retornos até hoje</span></div>
+      <div><span class="num" id="n-neg">0</span><span class="rot">em negociação</span></div>
+      <div><span class="num" id="n-fechados">0</span><span class="rot">fechados</span></div>
+    </section>
+    <nav class="filtros" aria-label="Filtros">
+      <div class="chips">
+        <button type="button" data-visao="ligar">Para ligar</button>
+        <button type="button" data-visao="depois">Mais tarde</button>
+        <button type="button" data-visao="negociacao">Negociação</button>
+        <button type="button" data-visao="fechados">Fechados</button>
+        <button type="button" data-visao="perdidos">Perdidos</button>
+        <button type="button" data-visao="todos">Todos</button>
+      </div>
+      <div class="selects">
+        <label class="sr" for="f-nicho">Nicho</label><select id="f-nicho"></select>
+        <label class="sr" for="f-cidade">Cidade</label><select id="f-cidade"></select>
+      </div>
+    </nav>
+    <p id="carregando" class="estado">Carregando leads…</p>
+    <p id="falha" class="estado" hidden></p>
+    <p id="vazio" class="estado" hidden></p>
+    <ul id="lista" class="lista"></ul>
+  </main>
+
+  <main id="vista-roteiro" class="roteiro" role="tabpanel" aria-labelledby="aba-roteiro" hidden>
+    <section class="bloco indicador" aria-labelledby="t-indicador">
+      <h2 id="t-indicador">Preço</h2>
+      <p>Últimos interessados decididos com a tabela atual: <span class="num" id="ind-amostra">0 de 10</span> · recusaram por preço: <span class="num" id="ind-recusas">0</span></p>
+      <p id="ind-texto"></p>
+      <div class="linha">
+        <button type="button" class="botao" id="ind-subir" hidden>Aplicar +R$10</button>
+        <button type="button" class="botao" id="ind-descer" hidden>Aplicar −R$10</button>
+      </div>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-tabela">
+      <h2 id="t-tabela">Tabela de preços (por mês)</h2>
+      <div class="tabela">
+        <label for="tab-solo">Solo · 1 profissional<input id="tab-solo" type="number" inputmode="numeric" min="1" step="1"></label>
+        <label for="tab-equipe">Equipe · 2–5<input id="tab-equipe" type="number" inputmode="numeric" min="1" step="1"></label>
+        <label for="tab-casaCheia">Casa cheia · 6+<input id="tab-casaCheia" type="number" inputmode="numeric" min="1" step="1"></label>
+      </div>
+      <div class="linha"><button type="button" class="botao-sec" id="tab-salvar">Salvar tabela</button></div>
+      <p>Sem taxa de implantação. Sem fidelidade. O primeiro mês é pago na contratação.</p>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-antes">
+      <h2 id="t-antes">Antes de ligar</h2>
+      <ul>
+        <li>Melhor horário: terça a quinta, das 9h às 11h ou das 14h às 16h. Evite sexta à tarde e sábado (casa cheia) e segunda (muita barbearia fecha).</li>
+        <li>Abra o cartão do lead e veja nota, bairro e se tem Instagram. Use isso na conversa.</li>
+        <li>O objetivo da primeira ligação é mandar a prévia, não fechar tudo na hora.</li>
+      </ul>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-abertura">
+      <h2 id="t-abertura">Abertura</h2>
+      <p><strong>Com prévia pronta</strong></p>
+      <p class="fala">"Oi, tudo bem? Falo com o responsável pela [nome do negócio]? Aqui é [seu nome], sou daqui da Grande Floripa. Vai ser rapidinho: montei uma prévia de site com agenda online pra [nome do negócio], já com as avaliações de vocês no Google. Posso te mandar o link no WhatsApp pra você dar uma olhada?"</p>
+      <p><strong>Ainda sem prévia</strong></p>
+      <p class="fala">"Oi, tudo bem? Falo com o responsável pela [nome do negócio]? Aqui é [seu nome], sou daqui da Grande Floripa. Eu faço site com agenda online pra negócios da região. Vi que vocês têm [nota] estrelas no Google com [nº] avaliações, mas ainda não têm site. Posso montar uma prévia do site de vocês, sem compromisso, e te mandar no WhatsApp?"</p>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-perguntas">
+      <h2 id="t-perguntas">Perguntas</h2>
+      <ol>
+        <li>"Hoje como o cliente marca horário com vocês?"</li>
+        <li>"Quantos profissionais atendem aí?" (define o plano)</li>
+        <li>"Já usaram algum app de agenda?"</li>
+      </ol>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-proposta">
+      <h2 id="t-proposta">Proposta</h2>
+      <p class="fala">"Fica [valor do plano] por mês, sem taxa de implantação e sem fidelidade. Tem o site com a cara de vocês, agenda online separada por profissional, o domínio .com.br no nome de vocês e a hospedagem. Um atendimento a mais por mês já paga."</p>
+      <p>Solo <strong data-preco="solo"></strong> · Equipe <strong data-preco="equipe"></strong> · Casa cheia <strong data-preco="casaCheia"></strong></p>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-fechamento">
+      <h2 id="t-fechamento">Fechamento</h2>
+      <p class="fala">"Posso deixar no ar essa semana? Você paga só o primeiro mês pra começar e eu te mando o passo a passo pra ligar a agenda."</p>
+      <p>Se pedir para pensar: "Claro. Te mando a prévia agora e te ligo [dia] pra saber o que achou. Melhor de manhã ou à tarde?" Marque <strong>Retornar</strong> e a data.</p>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-objecoes">
+      <h2 id="t-objecoes">Objeções</h2>
+      <ul>
+        <li><strong>"Já tenho Instagram."</strong> "O Instagram continua. O site aparece no Google quando alguém pesquisa por [serviço] em [bairro], e o cliente agenda sozinho, até de madrugada. O link vai na bio do Insta."</li>
+        <li><strong>"Marco tudo pelo WhatsApp."</strong> "Pode continuar. A agenda online é pra quem prefere marcar sozinho, e cada profissional vê a própria agenda no celular. Menos mensagem pra responder no meio do atendimento."</li>
+        <li><strong>"Tá caro" ou "agora não dá".</strong> "Não tem taxa de implantação e você cancela quando quiser. Custa menos que um app só de agenda, e aqui vem site e domínio junto. Um atendimento a mais no mês já paga." Se recusar, marque Perdeu → Preço.</li>
+        <li><strong>"Já uso Booksy, Trinks ou AppBarber."</strong> "A nossa agenda faz o mesmo e ainda vem com site e domínio próprio, por menos do que esses apps cobram só pela agenda."</li>
+        <li><strong>"Me manda por WhatsApp."</strong> "Mando agora. Amanhã te ligo rapidinho pra saber o que achou: melhor de manhã ou à tarde?" Marque Retornar e a data.</li>
+        <li><strong>"Preciso falar com meu sócio."</strong> "Claro. Te mando a prévia pra vocês verem juntos. Posso ligar [dia]?" Se perder, o motivo é Não decide sozinho.</li>
+        <li><strong>"Não tenho tempo agora."</strong> "Sem problema. Qual o melhor horário pra eu ligar? Leva três minutos." Marque Retornar e a data.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script type="module">
+/*__LOGICA__*/
+
+const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
+const NICHOS = { barbearia: "Barbearia", estetica: "Estética" };
+const estado = { leads: new Map(), tabela: { ...TABELA_PADRAO }, aba: "leads", visao: "ligar", nicho: "", cidade: "", carregado: false };
+const cartoes = new Map();
+const filas = new Map();
+let db = null;
+
+try {
+  const p = JSON.parse(localStorage.getItem("caderno:preferencias") || "{}");
+  for (const k of ["aba", "visao", "nicho", "cidade"]) if (typeof p[k] === "string") estado[k] = p[k];
+} catch {}
+if (location.hash === "#roteiro") estado.aba = "roteiro";
+
+function guardarPreferencias() {
+  try {
+    localStorage.setItem("caderno:preferencias", JSON.stringify({ aba: estado.aba, visao: estado.visao, nicho: estado.nicho, cidade: estado.cidade }));
+  } catch {}
+}
+
+let temporizadorAviso;
+function avisar(texto, tipo = "ok") {
+  const el = $("#aviso");
+  el.textContent = texto;
+  el.dataset.tipo = tipo;
+  el.hidden = false;
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(() => { el.hidden = true; }, 2600);
+}
+
+function mensagemErro(e) {
+  switch (e && e.code) {
+    case "invalid_argument": return "Não foi possível salvar: esta conta só pode ler o caderno.";
+    case "quota_exceeded": return "O caderno está cheio. Peça ao Claude para arquivar leads antigos.";
+    case "resource_exhausted": return "Muitas alterações seguidas. Espere alguns segundos e tente de novo.";
+    default: return "Não foi possível salvar agora. Tente de novo em instantes.";
+  }
+}
+
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+async function comRetentativa(fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    if (e && e.code === "unavailable") {
+      await esperar(400 + Math.random() * 800);
+      return fn();
+    }
+    throw e;
+  }
+}
+
+// Uma escrita por vez por documento: cada gravação espera a anterior do mesmo lead.
+function gravarLead(id, patch) {
+  if (!db) {
+    avisar("Os dados do caderno não estão disponíveis nesta visualização.", "erro");
+    return Promise.reject(new Error("sem db"));
+  }
+  const anterior = filas.get(id) || Promise.resolve();
+  const atual = anterior.catch(() => {}).then(() => comRetentativa(() => db.doc("leads/" + id).update(patch)));
+  filas.set(id, atual);
+  return atual.catch((e) => {
+    avisar(mensagemErro(e), "erro");
+    throw e;
+  });
+}
+
+async function salvarTabela(nova) {
+  if (!db) return;
+  try {
+    await comRetentativa(() => db.doc("config/oferta").set({ ...nova, atualizadoEm: new Date().toISOString() }));
+    avisar("Tabela salva");
+  } catch (e) {
+    avisar(mensagemErro(e), "erro");
+  }
+}
+
+function definirLink(a, href) {
+  if (href) {
+    a.href = href;
+    a.hidden = false;
+  } else {
+    a.removeAttribute("href");
+    a.hidden = true;
+  }
+}
+
+function criarCartao(id) {
+  const li = document.createElement("li");
+  li.className = "lead";
+  li.innerHTML = `
+    <button type="button" class="lead-cabeca" aria-expanded="false" aria-controls="corpo-${id}">
+      <span class="lead-linha1"><span class="lead-nome"></span><span class="pilula"></span></span>
+      <span class="lead-linha2"></span>
+      <span class="lead-linha3"><span class="nota"></span><span class="score"></span><span class="prox"></span></span>
+    </button>
+    <div class="lead-corpo" id="corpo-${id}" hidden>
+      <div class="fone-linha"><span class="fone"></span><button type="button" class="botao-sec copiar">Copiar</button></div>
+      <div class="acoes">
+        <a class="acao ligar">Ligar</a>
+        <a class="acao whats" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="acao insta" target="_blank" rel="noopener">Instagram</a>
+        <a class="acao maps" target="_blank" rel="noopener">Maps</a>
+        <a class="acao previa" target="_blank" rel="noopener">Prévia</a>
+      </div>
+      <p class="endereco"></p>
+      <fieldset><legend>Status</legend><div class="status-botoes"></div></fieldset>
+      <div class="painel-extra" hidden></div>
+      <p class="plano-atual" hidden><span class="plano-texto"></span><button type="button" class="botao-sec alterar-plano">Alterar plano</button></p>
+      <div class="campo">
+        <label for="prox-${id}">Próximo contato</label>
+        <div class="linha">
+          <input type="date" id="prox-${id}" class="prox-input">
+          <button type="button" class="botao-sec amanha">Amanhã</button>
+          <button type="button" class="botao-sec limpar-data">Limpar</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="notas-${id}">Notas</label>
+        <textarea id="notas-${id}" class="notas" rows="3" placeholder="Nome do dono, melhor horário, o que achou da prévia"></textarea>
+        <span class="salvo" aria-live="polite"></span>
+      </div>
+      <details class="historico"><summary>Histórico</summary><ol></ol></details>
+    </div>`;
+  const q = (s) => li.querySelector(s);
+  const c = {
+    li,
+    dados: null,
+    pendente: null,
+    r: {
+      cabeca: q(".lead-cabeca"), nome: q(".lead-nome"), pilula: q(".pilula"), linha2: q(".lead-linha2"),
+      nota: q(".nota"), score: q(".score"), prox: q(".prox"), corpo: q(".lead-corpo"), fone: q(".fone"),
+      copiar: q(".copiar"), ligar: q(".ligar"), whats: q(".whats"), insta: q(".insta"), maps: q(".maps"),
+      previa: q(".previa"), endereco: q(".endereco"), statusBotoes: q(".status-botoes"), extra: q(".painel-extra"),
+      planoAtual: q(".plano-atual"), planoTexto: q(".plano-texto"), alterarPlano: q(".alterar-plano"),
+      proxInput: q(".prox-input"), amanha: q(".amanha"), limparData: q(".limpar-data"), notas: q(".notas"),
+      salvo: q(".salvo"), historico: q(".historico ol"),
+    },
+  };
+  for (const s of STATUS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.status = s.id;
+    b.textContent = s.rotulo;
+    c.r.statusBotoes.append(b);
+  }
+
+  c.r.cabeca.addEventListener("click", () => {
+    const abrir = c.r.corpo.hidden;
+    c.r.corpo.hidden = !abrir;
+    c.r.cabeca.setAttribute("aria-expanded", String(abrir));
+  });
+
+  c.r.copiar.addEventListener("click", () => {
+    const selecionar = () => {
+      const faixa = document.createRange();
+      faixa.selectNodeContents(c.r.fone);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(faixa);
+      avisar("Número selecionado. Copie pelo menu do celular.");
+    };
+    try {
+      navigator.clipboard.writeText(c.dados?.telefone || "").then(() => avisar("Número copiado"), selecionar);
+    } catch {
+      selecionar();
+    }
+  });
+
+  c.r.statusBotoes.addEventListener("click", (ev) => {
+    const b = ev.target.closest("button[data-status]");
+    if (!b || !c.dados) return;
+    const novo = b.dataset.status;
+    if (novo === c.dados.status) return;
+    if (precisaDeMotivo(novo)) return abrirExtra(c, { tipo: "motivo" });
+    if (precisaDePlano(novo) && !c.dados.plano) return abrirExtra(c, { tipo: "plano", status: novo });
+    aplicarStatus(c, novo, {});
+  });
+
+  c.r.alterarPlano.addEventListener("click", () => abrirExtra(c, { tipo: "plano" }));
+
+  const salvarData = () =>
+    gravarLead(id, { proximoContato: c.r.proxInput.value || null, atualizadoEm: new Date().toISOString() }).then(
+      () => avisar(c.r.proxInput.value ? "Próximo contato: " + dataCurta(c.r.proxInput.value) : "Data removida"),
+      () => {},
+    );
+  c.r.proxInput.addEventListener("change", salvarData);
+  c.r.amanha.addEventListener("click", () => {
+    c.r.proxInput.value = somarDias(hojeLocal(), 1);
+    salvarData();
+  });
+  c.r.limparData.addEventListener("click", () => {
+    c.r.proxInput.value = "";
+    salvarData();
+  });
+
+  let temporizadorNotas;
+  const salvarNotas = () => {
+    clearTimeout(temporizadorNotas);
+    const valor = c.r.notas.value;
+    if (!c.dados || valor === (c.dados.notas || "")) return;
+    c.r.salvo.textContent = "Salvando…";
+    gravarLead(id, { notas: valor, atualizadoEm: new Date().toISOString() }).then(
+      () => { c.r.salvo.textContent = "Salvo"; },
+      () => { c.r.salvo.textContent = "Não salvo"; },
+    );
+  };
+  c.r.notas.addEventListener("input", () => {
+    c.r.salvo.textContent = "";
+    clearTimeout(temporizadorNotas);
+    temporizadorNotas = setTimeout(salvarNotas, 1200);
+  });
+  c.r.notas.addEventListener("blur", salvarNotas);
+  return c;
+}
+
+function abrirExtra(c, pendente) {
+  c.pendente = pendente;
+  const id = c.dados.slug;
+  const ex = c.r.extra;
+  ex.hidden = false;
+  if (pendente.tipo === "motivo") {
+    ex.innerHTML = `<fieldset><legend>Por que perdeu?</legend>${MOTIVOS.map(
+      (m) => `<label class="opcao"><input type="radio" name="motivo-${id}" value="${m.id}"> ${m.rotulo}</label>`,
+    ).join("")}</fieldset>
+      <div class="linha"><button type="button" class="botao confirmar">Marcar como perdido</button><button type="button" class="botao-sec cancelar">Cancelar</button></div>`;
+  } else {
+    ex.innerHTML = `<div class="campo"><label for="plano-${id}">Plano oferecido</label><select id="plano-${id}" class="plano-sel">${PLANOS.map(
+      (p) => `<option value="${p.id}">${p.rotulo} · ${p.profissionais}</option>`,
+    ).join("")}</select></div>
+      <div class="campo"><label for="preco-${id}">Preço mensal (R$)</label><input id="preco-${id}" class="preco-in" type="number" inputmode="numeric" min="1" step="1"></div>
+      <div class="linha"><button type="button" class="botao confirmar">${pendente.status ? "Salvar e marcar " + rotuloStatus(pendente.status) : "Salvar plano"}</button><button type="button" class="botao-sec cancelar">Cancelar</button></div>`;
+    const sel = ex.querySelector(".plano-sel");
+    const preco = ex.querySelector(".preco-in");
+    sel.value = c.dados.plano || "equipe";
+    preco.value = String(c.dados.plano && c.dados.precoMensal ? c.dados.precoMensal : estado.tabela[sel.value]);
+    sel.addEventListener("change", () => { preco.value = String(estado.tabela[sel.value]); });
+  }
+  ex.querySelector(".cancelar").addEventListener("click", () => fecharExtra(c));
+  ex.querySelector(".confirmar").addEventListener("click", () => {
+    if (pendente.tipo === "motivo") {
+      const marcado = ex.querySelector(`input[name="motivo-${id}"]:checked`);
+      if (!marcado) return avisar("Escolha o motivo da perda.", "erro");
+      return aplicarStatus(c, "perdeu", { motivoPerda: marcado.value });
+    }
+    const plano = ex.querySelector(".plano-sel").value;
+    const precoMensal = Number(ex.querySelector(".preco-in").value);
+    if (!(precoMensal > 0)) return avisar("Informe o preço oferecido.", "erro");
+    if (pendente.status) return aplicarStatus(c, pendente.status, { plano, precoMensal });
+    gravarLead(id, { plano, precoMensal, atualizadoEm: new Date().toISOString() }).then(
+      () => { fecharExtra(c); avisar("Plano salvo"); },
+      () => {},
+    );
+  });
+}
+
+function fecharExtra(c) {
+  c.pendente = null;
+  c.r.extra.hidden = true;
+  c.r.extra.replaceChildren();
+}
+
+function aplicarStatus(c, novo, extras) {
+  let patch;
+  try {
+    patch = mudarStatus(c.dados, novo, new Date().toISOString(), extras);
+  } catch (e) {
+    return avisar(e.message, "erro");
+  }
+  gravarLead(c.dados.slug, patch).then(() => { fecharExtra(c); avisar("Status: " + rotuloStatus(novo)); }, () => {});
+}
+
+function atualizarCartao(c, d) {
+  c.dados = d;
+  const r = c.r;
+  const hoje = hojeLocal();
+  r.nome.textContent = d.limpo ? "Lead arquivado" : d.nome || "Sem nome";
+  r.pilula.textContent = rotuloStatus(d.status);
+  r.pilula.dataset.status = d.status;
+  r.linha2.textContent = [NICHOS[d.nicho] || d.nicho, [d.bairro, d.cidade].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
+  r.nota.textContent = d.nota
+    ? `★ ${String(d.nota).replace(".", ",")} (${d.avaliacoes ?? 0})`
+    : d.avaliacoes ? `${d.avaliacoes} avaliações` : "Sem avaliações";
+  r.score.textContent = `${d.score ?? 0} pts`;
+  const vencido = Boolean(d.proximoContato && d.proximoContato <= hoje);
+  r.prox.textContent = d.proximoContato ? (vencido ? "Ligar hoje" : "Ligar em " + dataCurta(d.proximoContato)) : "";
+  r.prox.dataset.vencido = String(vencido);
+  r.fone.textContent = d.telefone || "Sem telefone";
+  r.copiar.hidden = !d.telefone;
+  definirLink(r.ligar, d.telefone ? "tel:" + d.telefone.replace(/[^\d+]/g, "") : null);
+  definirLink(r.whats, d.whatsapp);
+  definirLink(r.insta, d.instagramUrl);
+  definirLink(r.maps, d.mapsUrl);
+  definirLink(r.previa, d.previaUrl);
+  r.endereco.textContent = d.endereco || "";
+  r.endereco.hidden = !d.endereco;
+  for (const b of r.statusBotoes.children) b.setAttribute("aria-pressed", String(b.dataset.status === d.status));
+  const resumo = [];
+  if (d.plano) resumo.push(`Plano ${rotuloPlano(d.plano)} · ${formatarReais(d.precoMensal)}/mês`);
+  if (d.motivoPerda) resumo.push(`Motivo: ${rotuloMotivo(d.motivoPerda)}`);
+  r.planoTexto.textContent = resumo.join(" · ");
+  r.planoAtual.hidden = resumo.length === 0;
+  r.alterarPlano.hidden = !d.plano;
+  // Não sobrescreve um campo em edição: o snapshot pode chegar enquanto a pessoa digita.
+  if (document.activeElement !== r.proxInput) r.proxInput.value = d.proximoContato || "";
+  if (document.activeElement !== r.notas) r.notas.value = d.notas || "";
+  r.historico.replaceChildren(
+    ...[...(d.historico || [])].reverse().map((h) => {
+      const item = document.createElement("li");
+      item.textContent = `${rotuloStatus(h.status)} · ${dataHora(h.em)}`;
+      return item;
+    }),
+  );
+}
+
+function preencherSelect(sel, valores, atual, rotuloTodos, rotular = (v) => v) {
+  const opcoes = [["", rotuloTodos], ...valores.map((v) => [v, rotular(v)])];
+  const assinatura = JSON.stringify(opcoes);
+  if (sel.dataset.assinatura !== assinatura) {
+    sel.replaceChildren(
+      ...opcoes.map(([v, t]) => {
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = t;
+        return o;
+      }),
+    );
+    sel.dataset.assinatura = assinatura;
+  }
+  sel.value = atual;
+}
+
+function renderLeads() {
+  const hoje = hojeLocal();
+  const todos = [...estado.leads.values()];
+  const c = contagens(todos, hoje);
+  $("#n-ligar").textContent = c.ligar;
+  $("#n-vencidos").textContent = c.vencidos;
+  $("#n-neg").textContent = c.negociacao;
+  $("#n-fechados").textContent = c.fechados;
+  for (const b of document.querySelectorAll("[data-visao]")) b.setAttribute("aria-pressed", String(b.dataset.visao === estado.visao));
+  const nichos = [...new Set(todos.map((l) => l.nicho).filter(Boolean))].sort();
+  const cidades = [...new Set(todos.map((l) => l.cidade).filter(Boolean))].sort();
+  if (estado.carregado && estado.nicho && !nichos.includes(estado.nicho)) estado.nicho = "";
+  if (estado.carregado && estado.cidade && !cidades.includes(estado.cidade)) estado.cidade = "";
+  preencherSelect($("#f-nicho"), nichos, estado.nicho, "Todos os nichos", (v) => NICHOS[v] || v);
+  preencherSelect($("#f-cidade"), cidades, estado.cidade, "Todas as cidades");
+
+  const lista = ordenarLeads(filtrarLeads(todos, estado, hoje), hoje);
+  const ul = $("#lista");
+  const visiveis = new Set(lista.map((l) => l.slug));
+  for (const [id, cartao] of cartoes) {
+    if (!visiveis.has(id)) {
+      cartao.li.remove();
+      cartoes.delete(id);
+    }
+  }
+  lista.forEach((dados, i) => {
+    let cartao = cartoes.get(dados.slug);
+    if (!cartao) {
+      cartao = criarCartao(dados.slug);
+      cartoes.set(dados.slug, cartao);
+    }
+    if (cartao.dados !== dados) atualizarCartao(cartao, dados);
+    if (ul.children[i] !== cartao.li) ul.insertBefore(cartao.li, ul.children[i] || null);
+  });
+
+  $("#carregando").hidden = estado.carregado;
+  const vazio = $("#vazio");
+  vazio.hidden = !estado.carregado || lista.length > 0 || !$("#falha").hidden;
+  vazio.textContent =
+    estado.leads.size === 0
+      ? "Nenhum lead ainda. Os leads aparecem aqui quando o Claude enviar o primeiro lote."
+      : "Nenhum lead nesta lista.";
+}
+
+function renderRoteiro() {
+  const t = estado.tabela;
+  for (const el of document.querySelectorAll("[data-preco]")) el.textContent = formatarReais(t[el.dataset.preco]);
+  for (const p of PLANOS) {
+    const campo = $("#tab-" + p.id);
+    if (document.activeElement !== campo) campo.value = String(t[p.id]);
+  }
+  const ind = indicadorPreco([...estado.leads.values()], t);
+  $("#ind-amostra").textContent = `${ind.amostra} de 10`;
+  $("#ind-recusas").textContent = String(ind.recusasPreco);
+  const textos = {
+    aguardar: `Faltam ${10 - ind.amostra} decisões com a tabela atual para a próxima leitura.`,
+    subir: "Ninguém recusou por preço. Suba R$10 para os próximos.",
+    manter: "Uma recusa por preço em 10: a tabela está no ponto. Mantenha.",
+    descer: `${ind.recusasPreco} recusas por preço em 10. Desça R$10 para os próximos.`,
+  };
+  $("#ind-texto").textContent = textos[ind.sugestao];
+  $("#ind-subir").hidden = ind.sugestao !== "subir";
+  $("#ind-descer").hidden = ind.sugestao !== "descer";
+}
+
+function render() {
+  for (const b of document.querySelectorAll("[data-aba]")) b.setAttribute("aria-selected", String(b.dataset.aba === estado.aba));
+  $("#vista-leads").hidden = estado.aba !== "leads";
+  $("#vista-roteiro").hidden = estado.aba !== "roteiro";
+  renderLeads();
+  renderRoteiro();
+}
+
+function mostrarFalha(texto) {
+  const el = $("#falha");
+  el.textContent = texto;
+  el.hidden = false;
+  estado.carregado = true;
+  render();
+}
+
+function ouvir() {
+  db.collection("leads").limit(1000).onSnapshot(
+    (snap) => {
+      estado.leads = new Map(snap.docs.filter((d) => d.exists).map((d) => [d.id, d.data()]));
+      estado.carregado = true;
+      render();
+    },
+    () => mostrarFalha("A conexão com os dados do caderno caiu. Recarregue a página."),
+  );
+  db.doc("config/oferta").onSnapshot(
+    (snap) => {
+      const d = snap.exists ? snap.data() : null;
+      estado.tabela =
+        d && d.solo > 0 && d.equipe > 0 && d.casaCheia > 0
+          ? { solo: d.solo, equipe: d.equipe, casaCheia: d.casaCheia }
+          : { ...TABELA_PADRAO };
+      render();
+    },
+    () => {},
+  );
+}
+
+for (const b of document.querySelectorAll("[data-aba]")) {
+  b.addEventListener("click", () => { estado.aba = b.dataset.aba; guardarPreferencias(); render(); });
+}
+for (const b of document.querySelectorAll("[data-visao]")) {
+  b.addEventListener("click", () => { estado.visao = b.dataset.visao; guardarPreferencias(); render(); });
+}
+$("#f-nicho").addEventListener("change", (e) => { estado.nicho = e.target.value; guardarPreferencias(); render(); });
+$("#f-cidade").addEventListener("change", (e) => { estado.cidade = e.target.value; guardarPreferencias(); render(); });
+$("#tab-salvar").addEventListener("click", () => {
+  const nova = {};
+  for (const p of PLANOS) nova[p.id] = Number($("#tab-" + p.id).value);
+  if (Object.values(nova).some((v) => !(v > 0))) return avisar("Os preços precisam ser maiores que zero.", "erro");
+  salvarTabela(nova);
+});
+$("#ind-subir").addEventListener("click", () => salvarTabela(ajustarTabela(estado.tabela, 10)));
+$("#ind-descer").addEventListener("click", () => salvarTabela(ajustarTabela(estado.tabela, -10)));
+
+render();
+const SEM_DADOS = "Os dados do caderno não abrem nesta visualização. Abra pelo claude.ai, com a sua conta.";
+const pronto = window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null);
+pronto.then(
+  (namespace) => {
+    db = namespace;
+    if (!db) return mostrarFalha(SEM_DADOS);
+    ouvir();
+  },
+  () => mostrarFalha(SEM_DADOS),
+);
+</script>

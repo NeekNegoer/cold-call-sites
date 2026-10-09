@@ -11,7 +11,8 @@
     "buscar": "node --env-file-if-exists=.env prospeccao/cli/buscar.ts",
     "lote": "node prospeccao/cli/lote.ts",
     "detalhar": "node --env-file-if-exists=.env prospeccao/cli/detalhar.ts",
-    "limpar": "node prospeccao/cli/limpar.ts"
+    "limpar": "node prospeccao/cli/limpar.ts",
+    "painel:construir": "node painel/construir.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
