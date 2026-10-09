@@ -1,0 +1,20 @@
+{
+  "cidades": ["Florianópolis", "São José", "Palhoça", "Biguaçu"],
+  "uf": "Santa Catarina",
+  "nichos": {
+    "barbearia": { "termos": ["barbearia"] },
+    "estetica": {
+      "termos": [
+        "design de sobrancelhas",
+        "extensão de cílios",
+        "esmalteria",
+        "depilação",
+        "harmonização facial",
+        "clínica de estética",
+        "salão de beleza"
+      ]
+    }
+  },
+  "limites": { "maxPorTermo": 40, "tetoUsdPorExecucao": 1.0, "lotePadrao": 25 },
+  "precosUsd": { "lugar": 0.004, "detalhe": 0.002, "avaliacao": 0.0005, "imagem": 0.0005 }
+}
