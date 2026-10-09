@@ -107,3 +107,7 @@ Planejado e construído com o [Claude Code](https://claude.com/claude-code), seg
 
 - Skills de design de [Emil Kowalski](https://github.com/emilkowalski/skills), sob licença MIT (cópia em `.claude/skills/LICENSE-emilkowalski-skills`).
 - Scraper de Google Maps: [Apify](https://apify.com/compass/crawler-google-places).
+
+## Licença
+
+Código e documentação sob a [PolyForm Noncommercial 1.0.0](LICENSE.md): você pode ver, estudar e usar para fins não comerciais. Uso comercial, como vender sites com estas ferramentas, só com autorização; abra uma issue para conversar. As skills em `.claude/skills/` são de Emil Kowalski e seguem a licença MIT dele.
