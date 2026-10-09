@@ -68,7 +68,7 @@ Uma página privada publicada como artifact no claude.ai, com banco de dados pr�
 Requisitos: Node.js 24 ou mais novo e uma conta grátis na Apify. O plano grátis dá US$5 de crédito por mês e não pede cartão.
 
 ```bash
-git clone https://github.com/<usuario>/cold-call-sites.git
+git clone https://github.com/NeekNegoer/cold-call-sites.git
 cd cold-call-sites
 npm install
 cp .env.example .env   # depois cole o seu APIFY_TOKEN no .env
