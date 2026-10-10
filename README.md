@@ -28,25 +28,65 @@ flowchart LR
   C -->|fechou| S[site final + agenda]
 ```
 
-### 1. Prospecção (Plano A)
+## O Plano A, passo a passo
 
-- `buscar` chama o scraper de Google Maps da [Apify](https://apify.com/compass/crawler-google-places) por nicho e cidade, no modo mais barato (sem fotos e sem avaliações).
-- Cada lugar é classificado pelo campo "site" do Google: sem site; só rede social, link de bio ou app de agenda; ou site próprio (fora desta versão).
-- A pontuação vai de 0 a 100: avaliações (até 50), nota (até 25), celular (15) e Instagram identificado (10).
-- `lote` separa os 25 melhores do dia para o caderno.
-- `detalhar` busca avaliações, horário e fotos só desses 25, para montar as prévias.
-- Toda execução confere o saldo da Apify antes de rodar, respeita um teto de gasto e registra o custo.
+O Plano A cobre tudo até a ligação: achar os negócios, escolher os melhores e entregar a lista num caderno que abre no celular. Cada passo é um comando; os dados ficam na pasta `leads/`, que não vai para o git.
 
-### 2. Caderno de Ligações (Plano A)
+### 1. Buscar candidatos
 
-Uma página estática que abre no navegador do celular ou do computador. Os leads vão criptografados dentro dela (AES-256-GCM, chave derivada da senha com PBKDF2): sem a senha, o endereço não mostra nada. Status, notas e datas ficam salvos no próprio navegador, e um botão exporta o backup, que também alimenta a limpeza de 14 dias.
+```bash
+npm run buscar -- --nicho barbearia --cidade "São José"
+```
 
-- A lista segue a próxima ação: primeiro os retornos do dia, depois os leads novos por pontuação.
-- Status: novo, sem resposta, retornar, interessado, reunião, fechou e perdeu. Marcar como perdido exige o motivo.
-- O plano e o preço oferecidos ficam registrados. Um indicador acompanha quantos dos últimos 10 interessados recusaram por preço e sugere subir ou baixar a tabela.
-- A aba Roteiro traz abertura, perguntas, proposta, fechamento e respostas para as objeções mais comuns.
+- Chama o scraper de Google Maps da [Apify](https://apify.com/compass/crawler-google-places) com os termos do nicho (em `prospeccao/config.json`) na cidade escolhida, no modo mais barato: sem página de detalhe, fotos ou avaliações.
+- Descarta quem está fechado, quem não tem telefone, quem fica fora das quatro cidades e quem já tem site próprio.
+- Classifica o campo "site" do Google: sem site, ou só rede social, link de bio ou app de agenda (Instagram, Linktree, WhatsApp, Booksy, Trinks, AppBarber, Calendly e outros). Os dois tipos viram lead; do Instagram sai o @.
+- Dá uma pontuação de 0 a 100: avaliações (até 50), nota (até 25), celular (15) e Instagram identificado (10).
+- Grava um arquivo por lead em `leads/` e guarda o ID de cada lugar que virou lead, para ele não voltar numa busca futura. Lugares descartados são reavaliados de graça na busca seguinte.
+- Antes de rodar, confere o saldo da Apify e recusa a busca se ela puder passar do teto de gasto (US$1 por execução). Uma busca de 40 lugares custa cerca de US$0,16.
 
-### 3. Prévias, sites e agenda (Plano B)
+### 2. Montar o lote do dia
+
+```bash
+npm run lote -- --quantidade 25
+```
+
+Separa os 25 candidatos de maior pontuação. Dá para filtrar com `--nicho` e `--cidade`.
+
+### 3. Detalhar o lote
+
+```bash
+npm run detalhar
+```
+
+Faz uma segunda busca só com os leads do lote, agora com página de detalhe: horário de funcionamento, coordenadas, até 5 avaliações e até 4 fotos, salvas em `sites/public/fotos/`. Esse material alimenta as prévias do Plano B. Custa cerca de US$0,26 para 25 leads.
+
+### 4. Publicar o caderno
+
+```bash
+npm run painel:construir   # gera painel/dist/index.html com os leads criptografados
+npm run painel:publicar    # envia para o GitHub Pages
+npm run painel:local       # ou abre no computador, em http://localhost:4173
+```
+
+O caderno é uma página estática. Os leads vão criptografados dentro dela com a senha de `senha.env`: AES-256-GCM com chave derivada por PBKDF2-SHA256 (600 mil iterações). Sem a senha, o endereço não mostra nada. A página não é indexada por buscadores e não manda o próprio endereço para os sites abertos a partir dela.
+
+### 5. Ligar
+
+- A lista segue a próxima ação: primeiro os retornos do dia, depois os leads novos por pontuação. Filtros por situação, nicho e cidade.
+- Cada cartão traz nome, bairro, nota e número de avaliações, além dos botões de ligar, WhatsApp, Instagram e Maps, e o telefone para copiar.
+- Status: novo, sem resposta, retornar, interessado, reunião, fechou e perdeu. Interessado, reunião e fechou pedem o plano e o preço oferecidos; perdeu pede o motivo.
+- Um indicador acompanha quantos dos últimos 10 interessados recusaram por preço e sugere subir ou baixar a tabela em R$10.
+- A aba Roteiro traz abertura, perguntas, proposta, fechamento, respostas para as objeções mais comuns e a tabela de preços.
+
+Status, notas e datas ficam salvos no navegador de quem liga, por cima da lista publicada. Publicar um lote novo não apaga nada do que já foi anotado.
+
+### 6. Backup e limpeza
+
+- Em Roteiro, **Exportar backup** baixa e copia um arquivo com todas as anotações. **Importar** restaura o backup ou leva as anotações para outro aparelho. Faça um backup por semana: se o navegador apagar os dados do site, eles só voltam pelo backup.
+- A cada duas semanas, salve um backup recente (de menos de 1 hora) em `leads/_sistema/painel-status.json` e rode `npm run limpar`. Ele apaga os dados e as fotos de leads perdidos, e de leads novos ou sem resposta parados há mais de 14 dias. Depois, gere e publique o caderno de novo. As suas anotações continuam visíveis no caderno, como arquivadas.
+
+## O Plano B (a planejar): prévias, sites e agenda
 
 - Site de uma página feito com Astro, a partir de um template por nicho e de uma ficha por negócio (cores, textos, serviços, fotos e depoimentos).
 - Prévias publicadas no Cloudflare Pages, fora dos buscadores e com aviso de prévia.
@@ -57,7 +97,7 @@ Uma página estática que abre no navegador do celular ou do computador. Os lead
 | Pasta | Conteúdo |
 |---|---|
 | `prospeccao/` | busca, filtro, pontuação, lote, detalhes e limpeza (Plano A) |
-| `painel/` | página do Caderno de Ligações e as regras dela (Plano A) |
+| `painel/` | Caderno de Ligações: página, regras, criptografia e build (Plano A) |
 | `sites/` | projeto Astro das prévias e dos sites (Plano B) |
 | `agenda/` | Apps Script da agenda (Plano B) |
 | `docs/superpowers/` | spec e planos de implementação |
@@ -74,7 +114,7 @@ npm install
 cp .env.example .env   # depois cole o seu APIFY_TOKEN no .env
 ```
 
-Para o caderno, crie também um `senha.env` com `PAINEL_SENHA=` e uma frase longa (16 caracteres ou mais). Ele é ignorado pelo git.
+Para o caderno, crie também um `senha.env` com `PAINEL_SENHA=` e uma frase longa (16 caracteres ou mais). Ele é ignorado pelo git. Para publicar no GitHub Pages, `painel/dist/` precisa ser um clone de um repositório seu com o Pages ligado na branch `main`.
 
 Comandos:
 
@@ -91,7 +131,7 @@ Comandos:
 
 ## Privacidade
 
-- Nada pessoal vai para o repositório. O token fica em `.env`, os dados coletados em `leads/` e as fotos em `sites/public/fotos/`, todos ignorados pelo git.
+- Nada pessoal vai para o repositório. O token fica em `.env`, a senha do caderno em `senha.env`, os dados coletados em `leads/`, as fotos em `sites/public/fotos/` e os backups do caderno em `caderno-backup-*.json`, todos ignorados pelo git.
 - Os dados coletados são um cache de trabalho curto: leads perdidos ou parados há mais de 14 dias são apagados, e ficam só o ID do lugar e as anotações de quem ligou.
 - O Caderno de Ligações só abre com a senha: o arquivo publicado leva os leads criptografados, não é indexado por buscadores e não manda o endereço para os sites abertos a partir dele.
 - A Apify coleta páginas públicas do Google Maps. A seção de riscos da spec explica essa escolha e a alternativa oficial.
@@ -100,9 +140,10 @@ Comandos:
 
 | Item | Custo |
 |---|---|
-| Apify | grátis até US$5 por mês, o que rende vários lotes |
+| Apify | grátis até US$5 por mês; um lote completo (busca de uns 80 lugares e detalhes de 25) custa cerca de US$0,60 |
+| GitHub Pages (caderno) | grátis |
 | Cloudflare Pages | grátis |
-| Domínio `.com.br` | R$40 por ano por cliente, repassado na mensalidade |
+| Domínio `.com.br` | R$40 por ano por cliente, coberto pela manutenção mensal |
 
 ## Como foi feito
 
