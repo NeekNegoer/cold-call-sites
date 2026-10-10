@@ -83,8 +83,10 @@ export function paraPainel(l: Lead, agoraISO: string): { id: string; data: Docum
   };
 }
 
-// Todo lead que já saiu de "candidato" vai para o arquivo do painel. Quem envia pula os ids que
-// o painel já tem, então rodar o lote duas vezes antes de enviar não deixa ninguém de fora.
-export function documentosDoPainel(leads: Lead[], agoraISO: string): { id: string; data: DocumentoPainel }[] {
-  return leads.filter((l) => l.fase !== "candidato").map((l) => paraPainel(l, agoraISO));
+// Todo lead que já saiu de "candidato" vai para o painel publicado. A data de cada documento é
+// o meio-dia (São Paulo) do dia do lote: o limpar conta os 14 dias a partir dela.
+export function documentosDoPainel(leads: Lead[]): { id: string; data: DocumentoPainel }[] {
+  return leads
+    .filter((l) => l.fase !== "candidato")
+    .map((l) => paraPainel(l, l.lote ? new Date(`${l.lote}T12:00:00-03:00`).toISOString() : l.buscadoEm));
 }

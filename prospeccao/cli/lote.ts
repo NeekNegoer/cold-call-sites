@@ -2,7 +2,7 @@ import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import { carregarConfig } from "../config.ts";
 import { criarArmazem } from "../armazem.ts";
-import { documentosDoPainel, escolherLote } from "../lote.ts";
+import { escolherLote } from "../lote.ts";
 import { hojeEmSaoPaulo } from "../datas.ts";
 
 const { values } = parseArgs({
@@ -20,7 +20,5 @@ if (lote.length === 0) {
 }
 const hoje = hojeEmSaoPaulo(agora);
 for (const l of lote) armazem.salvarLead({ ...l, fase: "lote", lote: hoje });
-const documentos = documentosDoPainel(armazem.listarLeads(), agora.toISOString());
-armazem.gravarSistema("painel-lote.json", documentos);
-console.log(`Lote de ${hoje}: ${lote.length} leads novos · ${documentos.length} no arquivo do painel (leads/_sistema/painel-lote.json)`);
+console.log(`Lote de ${hoje}: ${lote.length} leads. Próximo passo: npm run painel:construir e publicar o painel.`);
 console.table(lote.map((l) => ({ score: l.score, nome: l.nome, cidade: l.cidade, telefone: l.telefone })));
