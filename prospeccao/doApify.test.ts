@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { converterLugar } from "./doApify.ts";
+import { converterDetalhes, converterLugar } from "./doApify.ts";
 
 const busca = JSON.parse(readFileSync(new URL("./fixtures/lugar-busca.json", import.meta.url), "utf8")) as unknown[];
 
@@ -61,4 +61,23 @@ test("sem phoneUnformatted usa phone para decidir se é celular", () => {
 test("fechado temporária ou definitivamente vira fechado: true", () => {
   assert.equal(converterLugar({ placeId: "a", title: "A", permanentlyClosed: true }, "barbearia")?.fechado, true);
   assert.equal(converterLugar({ placeId: "b", title: "B", temporarilyClosed: true }, "barbearia")?.fechado, true);
+});
+
+const detalhe = JSON.parse(readFileSync(new URL("./fixtures/lugar-detalhe.json", import.meta.url), "utf8")) as unknown;
+
+test("converte detalhes: horários, coordenadas, avaliações com texto e imagens", () => {
+  const d = converterDetalhes(detalhe);
+  assert.ok(d);
+  assert.equal(d.placeId, "ChIJteste000000000000001");
+  assert.deepEqual(d.horarios[1], { dia: "terça-feira", horas: "09:00 to 19:00" });
+  assert.deepEqual(d.coordenadas, { lat: -27.5969, lng: -48.6167 });
+  assert.deepEqual(d.reviews.map((r) => r.autor), ["Cliente Um", "Cliente Três"]);
+  assert.equal(d.reviews[0].nota, 5);
+  assert.equal(d.imagens.length, 2);
+});
+
+test("detalhes vazios não quebram", () => {
+  const d = converterDetalhes({ placeId: "ChIJvazio" });
+  assert.deepEqual(d, { placeId: "ChIJvazio", horarios: [], coordenadas: null, reviews: [], imagens: [] });
+  assert.equal(converterDetalhes({}), null);
 });

@@ -41,3 +41,42 @@ export function converterLugar(raw: unknown, nicho: string): LeadBruto | null {
     fechado: r.permanentlyClosed === true || r.temporarilyClosed === true,
   };
 }
+
+export interface DetalhesBrutos {
+  placeId: string;
+  horarios: { dia: string; horas: string }[];
+  coordenadas: { lat: number; lng: number } | null;
+  reviews: { autor: string; texto: string; nota: number }[];
+  imagens: string[];
+}
+
+export function converterDetalhes(raw: unknown): DetalhesBrutos | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Bruto;
+  const placeId = texto(r.placeId);
+  if (!placeId) return null;
+  const horarios = Array.isArray(r.openingHours)
+    ? r.openingHours.flatMap((h) => {
+        const o = (h ?? {}) as Bruto;
+        const dia = texto(o.day);
+        const horas = texto(o.hours);
+        return dia && horas ? [{ dia, horas }] : [];
+      })
+    : [];
+  const local = (r.location ?? {}) as Bruto;
+  const lat = numero(local.lat);
+  const lng = numero(local.lng);
+  const reviews = Array.isArray(r.reviews)
+    ? r.reviews
+        .flatMap((v) => {
+          const o = (v ?? {}) as Bruto;
+          const t = texto(o.text);
+          return t ? [{ autor: texto(o.name) ?? "Cliente", texto: t, nota: numero(o.stars) ?? 0 }] : [];
+        })
+        .slice(0, 5)
+    : [];
+  const imagens = Array.isArray(r.imageUrls)
+    ? r.imageUrls.filter((u): u is string => typeof u === "string" && u.startsWith("http")).slice(0, 4)
+    : [];
+  return { placeId, horarios, coordenadas: lat != null && lng != null ? { lat, lng } : null, reviews, imagens };
+}
