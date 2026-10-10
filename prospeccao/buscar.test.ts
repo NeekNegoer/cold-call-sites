@@ -56,7 +56,8 @@ test("grava candidatos, vistos e gasto", async () => {
   assert.deepEqual(r.novos.map((l) => l.slug), ["barbearia-teste-kobrasol", "studio-teste-sobrancelhas"]);
   assert.equal(r.descartes.site_proprio, 1);
   assert.equal(armazem.listarLeads().length, 2);
-  assert.equal(armazem.lerVistos().size, 3);
+  // Só candidatos viram "vistos": um descarte volta a ser avaliado se a classificação mudar.
+  assert.deepEqual([...armazem.lerVistos()], ["ChIJteste000000000000001", "ChIJteste000000000000002"]);
   const [uso] = armazem.lerUso();
   assert.ok(Math.abs(uso.gastoEstimadoUsd - 3 * 0.004) < 1e-9);
   assert.equal(uso.lugares, 3);
@@ -67,7 +68,8 @@ test("repetir a busca não duplica leads", async () => {
   await executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente: clienteFalso([], fixture).cliente, armazem, config, agora });
   const r = await executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente: clienteFalso([], fixture).cliente, armazem, config, agora });
   assert.equal(r.novos.length, 0);
-  assert.equal(r.descartes.ja_visto, 3);
+  assert.equal(r.descartes.ja_visto, 2);
+  assert.equal(r.descartes.site_proprio, 1);
   assert.equal(armazem.listarLeads().length, 2);
 });
 

@@ -91,7 +91,7 @@ Fluxo:
 - Modo barato: **sem** página de detalhe, **sem** fotos, **sem** avaliações e **sem** filtros pagos do ator (o `skipClosedPlaces` custa +US$0,001 por lugar), com limite de lugares por busca.
 - Campos usados: placeId, nome, endereço, bairro, cidade, telefone, site, nota, nº de avaliações, categoria, link do Maps.
 - Termos por nicho e bairros por cidade ficam em `prospeccao/config.json`.
-- Duplicados são removidos pelo placeId. IDs já vistos ficam em `leads/vistos.json` e não voltam.
+- Duplicados são removidos pelo placeId. IDs de lugares que viraram lead ficam em `leads/_sistema/vistos.json` e não voltam. Descartados não entram nessa lista: são reavaliados na busca seguinte, o que não custa a mais (a Apify cobra por lugar trazido, visto ou não) e recupera leads quando a lista de redes e apps de agenda cresce.
 - Endereços fora das 4 cidades são descartados.
 - **Isolamento:** o módulo da Apify só converte o resultado para o formato de lead (5.6). Trocar de fonte (ex.: API oficial do Google) não mexe em filtro, pontuação, painel nem sites.
 
@@ -101,7 +101,7 @@ Fluxo:
 - Descarta: sem telefone; fechado temporária ou definitivamente.
 - Classifica o campo "site":
   - vazio → `sem_site`
-  - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br, calendly.com, gendo.app, biolink.info, wa.link) → `so_rede`
+  - domínio de rede social, link de bio ou app de agenda (instagram.com, facebook.com, fb.com, linktr.ee, linkme.bio, beacons.ai, bio.link, wa.me, api.whatsapp.com, booksy.com, trinks.com, business.site, appbarber.com.br, cashbarber.com.br, calendly.com, gendo.app, biolink.info, wa.link, tiktok.com, chat.whatsapp.com, g.page, linkin.bio, taplink.cc) → `so_rede`
   - qualquer outro → `site_proprio`, descartado na v1
 - Se o site for instagram.com, extrai o @.
 

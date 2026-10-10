@@ -19,6 +19,11 @@ const REDES = [
   "gendo.app",
   "biolink.info",
   "wa.link",
+  "tiktok.com",
+  "chat.whatsapp.com",
+  "g.page",
+  "linkin.bio",
+  "taplink.cc",
 ];
 
 const CAMINHOS_INSTAGRAM_SEM_PERFIL = ["p", "reel", "reels", "explore", "stories", "accounts", "tv"];

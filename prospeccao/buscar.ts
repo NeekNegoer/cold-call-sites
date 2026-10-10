@@ -76,7 +76,7 @@ export async function executarBusca(
 
   for (const l of novos) deps.armazem.salvarLead(l);
   deps.armazem.gravarSistema("slugs.json", [...slugs].sort());
-  for (const b of brutos) vistos.add(b.placeId);
+  for (const l of novos) vistos.add(l.placeId);
   deps.armazem.salvarVistos(vistos);
 
   // Estimativa: a Apify só registra o gasto real alguns minutos depois da execução.

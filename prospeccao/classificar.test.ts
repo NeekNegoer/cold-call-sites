@@ -48,6 +48,11 @@ test("apps de agenda e links de bio achados nas buscas reais são so_rede", () =
     "https://barbeariadoze.gendo.app/",
     "https://biolink.info/barbeariadoze",
     "https://wa.link/abc123",
+    "https://www.tiktok.com/@barbeariadoze",
+    "https://chat.whatsapp.com/AbCdEf",
+    "https://g.page/barbeariadoze",
+    "https://linkin.bio/barbeariadoze",
+    "https://taplink.cc/barbeariadoze",
   ]) {
     assert.equal(classificarSite(url).classificacao, "so_rede", url);
   }
