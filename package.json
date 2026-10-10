@@ -12,7 +12,9 @@
     "lote": "node prospeccao/cli/lote.ts",
     "detalhar": "node --env-file-if-exists=.env prospeccao/cli/detalhar.ts",
     "limpar": "node prospeccao/cli/limpar.ts",
-    "painel:construir": "node --env-file-if-exists=senha.env painel/cli/construir.ts"
+    "painel:construir": "node --env-file-if-exists=senha.env painel/cli/construir.ts",
+    "painel:local": "python3 -m http.server 4173 --bind 127.0.0.1 --directory painel/dist",
+    "painel:publicar": "git -C painel/dist add index.html .nojekyll && git -C painel/dist commit -q -m 'Atualiza o caderno' && git -C painel/dist push -q"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
