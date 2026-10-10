@@ -1,6 +1,6 @@
 # Plano B1 — Gerador de sites — Design
 
-Data: 2026-10-10 · Status: em revisão · Detalha a parte de sites da seção 6 da [spec principal](2026-10-09-cold-call-sites-design.md). Onde as duas divergem, vale esta.
+Data: 2026-10-10 · Status: aprovada · Detalha a parte de sites da seção 6 da [spec principal](2026-10-09-cold-call-sites-design.md). Onde as duas divergem, vale esta.
 
 ## 1. Objetivo
 
@@ -235,7 +235,6 @@ interface FonteAgenda {
 
 ## 14. Riscos
 
-- **Fim do GitHub Pro:** sem o Pro (fim do Student Pack), o Pages de repo privado para e as prévias saem do ar. A saída é mudar a hospedagem, porque a pasta gerada serve em qualquer lugar estático.
 - **Uso comercial:** os termos do GitHub vedam o Pages como hospedagem comercial. Para prévias de venda o risco é baixo; sites de clientes não vão para o Pages.
 - **Usuário no link:** o dono vê "neeknegoer" no link da prévia, o que deixa de existir com domínio próprio.
 - **Fotos do Google Maps:** as fotos são de quem as postou no Google Maps. Elas aparecem só na prévia mostrada ao próprio negócio e são trocadas pelo material do cliente no site final.
