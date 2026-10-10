@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <title>Caderno de Ligações</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5,6 +12,7 @@
 <style>
 /* Layout: coluna única para o polegar — resumo, filtros, cartões que abrem no lugar; aba Roteiro à parte */
 :root {
+  color-scheme: light;
   --bg: #f2f4f6;
   --surface: #ffffff;
   --ink: #16212c;
@@ -42,7 +50,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
-  background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.45;
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.45;
   padding-inline: 16px; padding-block: 0 56px; -webkit-tap-highlight-color: transparent;
 }
 .casca { max-width: 720px; margin-inline: auto; display: grid; gap: 14px; }
@@ -69,7 +77,7 @@ button:active { transform: scale(0.97); }
 .chips button { flex: none; border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 999px; font-size: 0.9rem; }
 .chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-select, input[type="date"], input[type="number"], textarea {
+select, input[type="date"], input[type="number"], input[type="password"], textarea {
   width: 100%; min-width: 0; font-size: 16px; padding: 8px 10px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--surface);
 }
@@ -134,6 +142,14 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
   font-weight: 600; box-shadow: 0 6px 24px color-mix(in srgb, var(--ink) 25%, transparent); z-index: 5;
 }
 .aviso[data-tipo="erro"] { background: var(--st-perdeu); color: var(--accent-ink); }
+.cadeado { display: grid; gap: 12px; max-width: 420px; padding-top: 24px; }
+.cadeado p { margin: 0; color: var(--muted); }
+.cadeado-form { display: grid; gap: 12px; }
+.cadeado .erro { color: var(--st-perdeu); font-weight: 600; min-height: 1.4em; }
+.gerado { margin: 0; color: var(--muted); font-size: 0.8rem; }
+.topo-acoes { display: flex; align-items: center; gap: 8px; }
+#trancar { min-height: 32px; padding: 4px 10px; font-size: 0.85rem; }
+#bk-texto { font-family: var(--font-num); font-size: 0.8rem; }
 @media (hover: hover) {
   .acao:hover, .botao-sec:hover, .chips button:hover { border-color: var(--muted); }
   .lead-cabeca:hover { background: color-mix(in srgb, var(--chip) 60%, transparent); }
@@ -146,17 +162,33 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
   * { transition: none !important; }
 }
 </style>
-
+</head>
+<body>
 <div class="casca">
   <header class="topo">
     <h1>Caderno de Ligações</h1>
-    <div class="abas" role="tablist" aria-label="Seções">
-      <button type="button" role="tab" id="aba-leads" data-aba="leads" aria-controls="vista-leads">Leads</button>
-      <button type="button" role="tab" id="aba-roteiro" data-aba="roteiro" aria-controls="vista-roteiro">Roteiro</button>
+    <div class="topo-acoes" id="topo-acoes" hidden>
+      <div class="abas" role="tablist" aria-label="Seções">
+        <button type="button" role="tab" id="aba-leads" data-aba="leads" aria-controls="vista-leads">Leads</button>
+        <button type="button" role="tab" id="aba-roteiro" data-aba="roteiro" aria-controls="vista-roteiro">Roteiro</button>
+      </div>
+      <button type="button" class="botao-sec" id="trancar">Trancar</button>
     </div>
   </header>
 
-  <main id="vista-leads" class="casca" role="tabpanel" aria-labelledby="aba-leads">
+  <main id="vista-cadeado" class="cadeado" aria-labelledby="t-cadeado">
+    <h2 id="t-cadeado">Digite a senha do caderno</h2>
+    <p>Os leads estão criptografados. Sem a senha, este endereço não mostra nada.</p>
+    <form id="form-senha" class="cadeado-form">
+      <label class="sr" for="senha">Senha</label>
+      <input type="password" id="senha" autocomplete="current-password" required>
+      <label class="opcao" for="lembrar"><input type="checkbox" id="lembrar"> Lembrar neste aparelho</label>
+      <div class="linha"><button type="submit" class="botao" id="abrir">Abrir caderno</button></div>
+      <p class="erro" id="senha-erro" role="alert"></p>
+    </form>
+  </main>
+
+  <main id="vista-leads" class="casca" role="tabpanel" aria-labelledby="aba-leads" hidden>
     <section class="resumo" aria-label="Resumo do dia">
       <div><span class="num" id="n-ligar">0</span><span class="rot">para ligar</span></div>
       <div><span class="num" id="n-vencidos">0</span><span class="rot">retornos até hoje</span></div>
@@ -177,6 +209,7 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
         <label class="sr" for="f-cidade">Cidade</label><select id="f-cidade"></select>
       </div>
     </nav>
+    <p id="gerado" class="gerado"></p>
     <p id="carregando" class="estado">Carregando leads…</p>
     <p id="falha" class="estado" hidden></p>
     <p id="vazio" class="estado" hidden></p>
@@ -203,6 +236,22 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
       </div>
       <div class="linha"><button type="button" class="botao-sec" id="tab-salvar">Salvar tabela</button></div>
       <p>Sem taxa de implantação. Sem fidelidade. O primeiro mês é pago na contratação.</p>
+    </section>
+
+    <section class="bloco" aria-labelledby="t-backup">
+      <h2 id="t-backup">Backup</h2>
+      <p>Status, notas e datas ficam só neste navegador. Exporte um backup toda semana e mande para o seu computador: ele restaura tudo se o navegador apagar os dados, e o Claude usa o mesmo arquivo na limpeza de 14 dias.</p>
+      <div class="linha"><button type="button" class="botao" id="bk-exportar">Exportar backup</button></div>
+      <label class="sr" for="bk-texto">Texto do backup</label>
+      <textarea id="bk-texto" rows="4" readonly hidden></textarea>
+      <details>
+        <summary>Importar backup</summary>
+        <div class="campo">
+          <label for="bk-importar">Cole o texto do backup</label>
+          <textarea id="bk-importar" rows="4"></textarea>
+        </div>
+        <div class="linha"><button type="button" class="botao-sec" id="bk-aplicar">Importar</button></div>
+      </details>
     </section>
 
     <section class="bloco" aria-labelledby="t-antes">
@@ -260,15 +309,32 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
   <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
 </div>
 
+<script type="application/json" id="cofre">__COFRE__</script>
 <script type="module">
 /*__LOGICA__*/
 
 const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
 const NICHOS = { barbearia: "Barbearia", estetica: "Estética" };
-const estado = { leads: new Map(), tabela: { ...TABELA_PADRAO }, aba: "leads", visao: "ligar", nicho: "", cidade: "", carregado: false };
+const CHAVES = { anotacoes: "caderno:anotacoes:v1", oferta: "caderno:oferta:v1", senha: "caderno:senha" };
+const estado = {
+  docs: [], anotacoes: {}, leads: new Map(), tabela: { ...TABELA_PADRAO }, geradoEm: null,
+  aba: "leads", visao: "ligar", nicho: "", cidade: "", carregado: false, aberto: false,
+};
 const cartoes = new Map();
-const filas = new Map();
-let db = null;
+
+function lerJSON(chave, padrao) {
+  try {
+    const v = localStorage.getItem(chave);
+    return v ? JSON.parse(v) : padrao;
+  } catch {
+    return padrao;
+  }
+}
+const tabelaValida = (t) => Boolean(t && t.solo > 0 && t.equipe > 0 && t.casaCheia > 0);
+estado.anotacoes = lerJSON(CHAVES.anotacoes, {});
+const ofertaSalva = lerJSON(CHAVES.oferta, null);
+if (tabelaValida(ofertaSalva)) estado.tabela = { solo: ofertaSalva.solo, equipe: ofertaSalva.equipe, casaCheia: ofertaSalva.casaCheia };
+const recalcular = () => { estado.leads = mesclarLeads(estado.docs, estado.anotacoes); };
 
 try {
   const p = JSON.parse(localStorage.getItem("caderno:preferencias") || "{}");
@@ -292,51 +358,31 @@ function avisar(texto, tipo = "ok") {
   temporizadorAviso = setTimeout(() => { el.hidden = true; }, 2600);
 }
 
-function mensagemErro(e) {
-  switch (e && e.code) {
-    case "invalid_argument": return "Não foi possível salvar: esta conta só pode ler o caderno.";
-    case "quota_exceeded": return "O caderno está cheio. Peça ao Claude para arquivar leads antigos.";
-    case "resource_exhausted": return "Muitas alterações seguidas. Espere alguns segundos e tente de novo.";
-    default: return "Não foi possível salvar agora. Tente de novo em instantes.";
-  }
-}
+const FALHA_SALVAR = "Não foi possível salvar neste navegador. Exporte um backup no Roteiro e tente de novo.";
 
-const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
-async function comRetentativa(fn) {
-  try {
-    return await fn();
-  } catch (e) {
-    if (e && e.code === "unavailable") {
-      await esperar(400 + Math.random() * 800);
-      return fn();
-    }
-    throw e;
-  }
-}
-
-// Uma escrita por vez por documento: cada gravação espera a anterior do mesmo lead.
 function gravarLead(id, patch) {
-  if (!db) {
-    avisar("Os dados do caderno não estão disponíveis nesta visualização.", "erro");
-    return Promise.reject(new Error("sem db"));
+  const novas = anotar(estado.anotacoes, id, patch);
+  try {
+    localStorage.setItem(CHAVES.anotacoes, JSON.stringify(novas));
+  } catch {
+    avisar(FALHA_SALVAR, "erro");
+    return Promise.reject(new Error("armazenamento"));
   }
-  const anterior = filas.get(id) || Promise.resolve();
-  const atual = anterior.catch(() => {}).then(() => comRetentativa(() => db.doc("leads/" + id).update(patch)));
-  filas.set(id, atual);
-  return atual.catch((e) => {
-    avisar(mensagemErro(e), "erro");
-    throw e;
-  });
+  estado.anotacoes = novas;
+  recalcular();
+  render();
+  return Promise.resolve();
 }
 
-async function salvarTabela(nova) {
-  if (!db) return;
+function salvarTabela(nova) {
   try {
-    await comRetentativa(() => db.doc("config/oferta").set({ ...nova, atualizadoEm: new Date().toISOString() }));
-    avisar("Tabela salva");
-  } catch (e) {
-    avisar(mensagemErro(e), "erro");
+    localStorage.setItem(CHAVES.oferta, JSON.stringify({ ...nova, atualizadoEm: new Date().toISOString() }));
+  } catch {
+    return avisar(FALHA_SALVAR, "erro");
   }
+  estado.tabela = { solo: nova.solo, equipe: nova.equipe, casaCheia: nova.casaCheia };
+  render();
+  avisar("Tabela salva");
 }
 
 function definirLink(a, href) {
@@ -660,41 +706,19 @@ function renderRoteiro() {
 }
 
 function render() {
+  $("#vista-cadeado").hidden = estado.aberto;
+  $("#topo-acoes").hidden = !estado.aberto;
+  if (!estado.aberto) {
+    $("#vista-leads").hidden = true;
+    $("#vista-roteiro").hidden = true;
+    return;
+  }
   for (const b of document.querySelectorAll("[data-aba]")) b.setAttribute("aria-selected", String(b.dataset.aba === estado.aba));
   $("#vista-leads").hidden = estado.aba !== "leads";
   $("#vista-roteiro").hidden = estado.aba !== "roteiro";
+  $("#gerado").textContent = estado.geradoEm ? `Lista publicada em ${dataHora(estado.geradoEm)}` : "";
   renderLeads();
   renderRoteiro();
-}
-
-function mostrarFalha(texto) {
-  const el = $("#falha");
-  el.textContent = texto;
-  el.hidden = false;
-  estado.carregado = true;
-  render();
-}
-
-function ouvir() {
-  db.collection("leads").limit(1000).onSnapshot(
-    (snap) => {
-      estado.leads = new Map(snap.docs.filter((d) => d.exists).map((d) => [d.id, d.data()]));
-      estado.carregado = true;
-      render();
-    },
-    () => mostrarFalha("A conexão com os dados do caderno caiu. Recarregue a página."),
-  );
-  db.doc("config/oferta").onSnapshot(
-    (snap) => {
-      const d = snap.exists ? snap.data() : null;
-      estado.tabela =
-        d && d.solo > 0 && d.equipe > 0 && d.casaCheia > 0
-          ? { solo: d.solo, equipe: d.equipe, casaCheia: d.casaCheia }
-          : { ...TABELA_PADRAO };
-      render();
-    },
-    () => {},
-  );
 }
 
 for (const b of document.querySelectorAll("[data-aba]")) {
@@ -714,15 +738,112 @@ $("#tab-salvar").addEventListener("click", () => {
 $("#ind-subir").addEventListener("click", () => salvarTabela(ajustarTabela(estado.tabela, 10)));
 $("#ind-descer").addEventListener("click", () => salvarTabela(ajustarTabela(estado.tabela, -10)));
 
+$("#trancar").addEventListener("click", () => {
+  try { localStorage.removeItem(CHAVES.senha); } catch {}
+  location.reload();
+});
+
+function baixar(nome, texto) {
+  const url = URL.createObjectURL(new Blob([texto], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nome;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+$("#bk-exportar").addEventListener("click", () => {
+  const texto = JSON.stringify(montarBackup(estado.leads.values(), estado.anotacoes, estado.tabela, new Date().toISOString()));
+  const campo = $("#bk-texto");
+  campo.value = texto;
+  campo.hidden = false;
+  try { baixar(`caderno-backup-${hojeLocal()}.json`, texto); } catch {}
+  const selecionar = () => {
+    campo.focus();
+    campo.select();
+    avisar("Backup baixado. Se precisar, copie o texto selecionado.");
+  };
+  try {
+    navigator.clipboard.writeText(texto).then(() => avisar("Backup baixado e copiado"), selecionar);
+  } catch {
+    selecionar();
+  }
+});
+
+$("#bk-aplicar").addEventListener("click", () => {
+  let r;
+  try {
+    r = importarBackup(estado.anotacoes, $("#bk-importar").value);
+  } catch (e) {
+    return avisar(e.message, "erro");
+  }
+  try {
+    localStorage.setItem(CHAVES.anotacoes, JSON.stringify(r.anotacoes));
+    if (tabelaValida(r.oferta)) localStorage.setItem(CHAVES.oferta, JSON.stringify(r.oferta));
+  } catch {
+    return avisar(FALHA_SALVAR, "erro");
+  }
+  estado.anotacoes = r.anotacoes;
+  if (tabelaValida(r.oferta)) estado.tabela = { solo: r.oferta.solo, equipe: r.oferta.equipe, casaCheia: r.oferta.casaCheia };
+  $("#bk-importar").value = "";
+  recalcular();
+  render();
+  avisar("Backup importado");
+});
+
+let COFRE = null;
+try {
+  COFRE = JSON.parse($("#cofre").textContent);
+} catch {}
+
+async function abrir(senha) {
+  const texto = COFRE ? await descriptografar(COFRE, senha) : null;
+  if (texto === null) return false;
+  const dados = JSON.parse(texto);
+  estado.docs = Array.isArray(dados.leads) ? dados.leads : [];
+  estado.geradoEm = dados.geradoEm || null;
+  estado.aberto = true;
+  estado.carregado = true;
+  recalcular();
+  render();
+  // Pede ao navegador para não apagar as anotações quando faltar espaço (Android respeita; iPhone ignora).
+  try { navigator.storage?.persist?.(); } catch {}
+  return true;
+}
+
+$("#form-senha").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const botao = $("#abrir");
+  const erro = $("#senha-erro");
+  const senha = $("#senha").value;
+  botao.disabled = true;
+  botao.textContent = "Abrindo…";
+  erro.textContent = "";
+  const ok = await abrir(senha);
+  botao.disabled = false;
+  botao.textContent = "Abrir caderno";
+  if (!ok) {
+    erro.textContent = COFRE ? "Senha incorreta." : "Esta página veio sem os leads. Peça ao Claude para publicar de novo.";
+    return;
+  }
+  $("#senha").value = "";
+  if ($("#lembrar").checked) {
+    try { localStorage.setItem(CHAVES.senha, senha); } catch {}
+  }
+});
+
 render();
-const SEM_DADOS = "Os dados do caderno não abrem nesta visualização. Abra pelo claude.ai, com a sua conta.";
-const pronto = window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null);
-pronto.then(
-  (namespace) => {
-    db = namespace;
-    if (!db) return mostrarFalha(SEM_DADOS);
-    ouvir();
-  },
-  () => mostrarFalha(SEM_DADOS),
-);
+let senhaSalva = null;
+try { senhaSalva = localStorage.getItem(CHAVES.senha); } catch {}
+if (senhaSalva) {
+  abrir(senhaSalva).then((ok) => {
+    if (!ok) {
+      try { localStorage.removeItem(CHAVES.senha); } catch {}
+    }
+  });
+}
 </script>
+</body>
+</html>
