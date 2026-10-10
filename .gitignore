@@ -1,12 +1,25 @@
+# Segredos: token da Apify e senha do caderno
 .env
 .env.*
 *.env
+senha.env
 !.env.example
-node_modules/
+
+# Dados coletados e de trabalho: nunca vão para o repositório público
 leads/
 sites/public/fotos/
+caderno-backup-*.json
+
+# Caderno gerado: clone do repositório do GitHub Pages, com os leads criptografados
+painel/dist/
+
+# Build e dependências
+node_modules/
 dist/
 .astro/
+
+# Locais do editor e do Claude Code
 .DS_Store
 .claude/settings.local.json
 CLAUDE.local.md
+.superpowers/
