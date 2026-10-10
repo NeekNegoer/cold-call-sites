@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { selecionarParaLimpar, PATCH_LIMPEZA } from "./limpar.ts";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { criarArmazem } from "./armazem.ts";
+import { executarLimpeza, selecionarParaLimpar, PATCH_LIMPEZA } from "./limpar.ts";
 import { leadDeTeste } from "./fixtures/lead.ts";
 
 const AGORA = new Date("2026-10-30T12:00:00Z");
@@ -32,4 +36,44 @@ test("o patch apaga dados coletados e mantém o trabalho de quem liga", () => {
   for (const campo of ["slug", "placeId", "status", "notas", "historico", "plano", "precoMensal", "motivoPerda", "nicho", "cidade", "score"]) {
     assert.equal(campo in PATCH_LIMPEZA, false, campo);
   }
+});
+
+function armazemComLeads() {
+  const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
+  armazem.salvarLead(leadDeTeste({ slug: "perdido", fase: "lote" }));
+  armazem.salvarLead(leadDeTeste({ slug: "interessado", fase: "lote" }));
+  return armazem;
+}
+
+test("exportação velha ou no formato antigo é recusada e nada é apagado", () => {
+  for (const exportacao of [
+    [{ id: "perdido", status: "perdeu", atualizadoEm: recente }],
+    { exportadoEm: "2026-10-30T10:00:00Z", status: [{ id: "perdido", status: "perdeu", atualizadoEm: recente }] },
+  ]) {
+    const armazem = armazemComLeads();
+    armazem.gravarSistema("painel-status.json", exportacao);
+    assert.throws(() => executarLimpeza({ armazem, agora: AGORA, apagarFotos: () => {} }), /exportar/);
+    assert.equal(armazem.listarLeads().length, 2);
+  }
+});
+
+test("exportação recente apaga, gera os patches a partir do painel e é consumida", () => {
+  const armazem = armazemComLeads();
+  armazem.gravarSistema("painel-status.json", {
+    exportadoEm: "2026-10-30T11:30:00Z",
+    status: [
+      { id: "perdido", status: "perdeu", atualizadoEm: recente },
+      { id: "interessado", status: "interessado", atualizadoEm: antigo },
+      { id: "apagado-antes", status: "perdeu", atualizadoEm: antigo },
+      { id: "ja-limpo", status: "perdeu", atualizadoEm: antigo, limpo: true },
+    ],
+  });
+  const fotosApagadas: string[] = [];
+  const r = executarLimpeza({ armazem, agora: AGORA, apagarFotos: (slug) => fotosApagadas.push(slug) });
+  assert.deepEqual(r.apagados, ["perdido"]);
+  assert.deepEqual(fotosApagadas, ["perdido"]);
+  assert.deepEqual(armazem.listarLeads().map((l) => l.slug), ["interessado"]);
+  assert.deepEqual(r.paraPainel.map((p) => p.id), ["perdido", "apagado-antes"]);
+  assert.deepEqual(armazem.lerSistema("painel-limpar.json", []), r.paraPainel);
+  assert.equal(armazem.lerSistema("painel-status.json", null), null);
 });

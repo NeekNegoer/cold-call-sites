@@ -37,6 +37,7 @@ export function criarArmazem(raiz: string) {
     lerUso: () => ler<RegistroUso[]>(join(pastaSistema, "uso.json"), []),
     gravarSistema: (nome: string, valor: unknown) => gravar(join(pastaSistema, nome), valor),
     lerSistema: <T>(nome: string, padrao: T): T => ler<T>(join(pastaSistema, nome), padrao),
+    removerSistema: (nome: string) => rmSync(join(pastaSistema, nome), { force: true }),
   };
 }
 

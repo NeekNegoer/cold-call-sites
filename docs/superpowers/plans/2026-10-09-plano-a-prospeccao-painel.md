@@ -3409,7 +3409,7 @@ Expected: todos PASS; `tsc` sem erros.
 
 - [ ] **Step 6: Ensaiar o fluxo completo uma vez**
 
-1. `ArtifactData` `list` da coleção `leads` → grave `leads/_sistema/painel-status.json` como array de `{ id, status, atualizadoEm }` (um item por documento).
+1. `ArtifactData` `list` da coleção `leads` → grave `leads/_sistema/painel-status.json` como `{ "exportadoEm": "<agora em ISO>", "status": [{ id, status, atualizadoEm, limpo }] }` (um item por documento). O `limpar` recusa exportação com mais de 1 hora e apaga o arquivo depois de usar.
 2. Run: `npm run limpar`
    Expected: hoje, logo após o primeiro lote, "Apagados localmente: 0 · para limpar no painel: 0" (ou só candidatos com mais de 14 dias).
 3. Se `painel-limpar.json` tiver itens: `ArtifactData` `batch` com um `update` por item em `leads/<id>` usando o `patch`.
