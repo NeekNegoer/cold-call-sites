@@ -4,7 +4,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { criarArmazem } from "./armazem.ts";
-import { executarLimpeza, selecionarParaLimpar, PATCH_LIMPEZA } from "./limpar.ts";
+import { executarLimpeza, selecionarParaLimpar } from "./limpar.ts";
 import { leadDeTeste } from "./fixtures/lead.ts";
 
 const AGORA = new Date("2026-10-30T12:00:00Z");
@@ -29,15 +29,6 @@ test("aplica a regra de 14 dias", () => {
   assert.deepEqual(selecionarParaLimpar(leads, status, AGORA), ["perdido", "novo-parado", "candidato-velho"]);
 });
 
-test("o patch apaga dados coletados e mantém o trabalho de quem liga", () => {
-  assert.equal(PATCH_LIMPEZA.limpo, true);
-  assert.equal(PATCH_LIMPEZA.telefone, null);
-  assert.equal(PATCH_LIMPEZA.nome, null);
-  for (const campo of ["slug", "placeId", "status", "notas", "historico", "plano", "precoMensal", "motivoPerda", "nicho", "cidade", "score"]) {
-    assert.equal(campo in PATCH_LIMPEZA, false, campo);
-  }
-});
-
 function armazemComLeads() {
   const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
   armazem.salvarLead(leadDeTeste({ slug: "perdido", fase: "lote" }));
@@ -52,28 +43,27 @@ test("exportação velha ou no formato antigo é recusada e nada é apagado", ()
   ]) {
     const armazem = armazemComLeads();
     armazem.gravarSistema("painel-status.json", exportacao);
-    assert.throws(() => executarLimpeza({ armazem, agora: AGORA, apagarFotos: () => {} }), /exportar/);
+    assert.throws(() => executarLimpeza({ armazem, agora: AGORA, apagarFotos: () => {} }), /Exporte/);
     assert.equal(armazem.listarLeads().length, 2);
   }
 });
 
-test("exportação recente apaga, gera os patches a partir do painel e é consumida", () => {
+test("exportação recente do backup apaga só os arquivos locais e é consumida", () => {
   const armazem = armazemComLeads();
   armazem.gravarSistema("painel-status.json", {
+    tipo: "caderno-backup",
     exportadoEm: "2026-10-30T11:30:00Z",
+    anotacoes: {},
     status: [
-      { id: "perdido", status: "perdeu", atualizadoEm: recente },
-      { id: "interessado", status: "interessado", atualizadoEm: antigo },
-      { id: "apagado-antes", status: "perdeu", atualizadoEm: antigo },
-      { id: "ja-limpo", status: "perdeu", atualizadoEm: antigo, limpo: true },
+      { id: "perdido", status: "perdeu", atualizadoEm: recente, limpo: false },
+      { id: "interessado", status: "interessado", atualizadoEm: antigo, limpo: false },
     ],
   });
   const fotosApagadas: string[] = [];
   const r = executarLimpeza({ armazem, agora: AGORA, apagarFotos: (slug) => fotosApagadas.push(slug) });
-  assert.deepEqual(r.apagados, ["perdido"]);
+  assert.deepEqual(r, { apagados: ["perdido"] });
   assert.deepEqual(fotosApagadas, ["perdido"]);
   assert.deepEqual(armazem.listarLeads().map((l) => l.slug), ["interessado"]);
-  assert.deepEqual(r.paraPainel.map((p) => p.id), ["perdido", "apagado-antes"]);
-  assert.deepEqual(armazem.lerSistema("painel-limpar.json", []), r.paraPainel);
+  assert.equal(armazem.lerSistema("painel-limpar.json", "ausente"), "ausente");
   assert.equal(armazem.lerSistema("painel-status.json", null), null);
 });

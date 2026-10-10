@@ -11,9 +11,7 @@ try {
     agora: new Date(),
     apagarFotos: (slug) => rmSync(join(raiz, "sites", "public", "fotos", slug), { recursive: true, force: true }),
   });
-  console.log(
-    `Apagados localmente: ${r.apagados.length} · para limpar no painel: ${r.paraPainel.length} (leads/_sistema/painel-limpar.json)`,
-  );
+  console.log(`Apagados localmente: ${r.apagados.length}. Gere e publique o painel de novo para tirá-los de lá.`);
 } catch (e) {
   console.error((e as Error).message);
   process.exit(1);
