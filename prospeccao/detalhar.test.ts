@@ -24,37 +24,62 @@ test("entrada pede página de detalhe, 4 fotos e 5 avaliações", () => {
   assert.equal(e.maxReviews, 5);
 });
 
-test("detalha só o lote; quem não voltou continua no lote", async () => {
+function clienteQueAnota() {
+  const chamadas = { saldo: 0, rodar: 0, entrada: {} as Record<string, unknown> };
+  const cliente: ClienteApify = {
+    saldo: async () => {
+      chamadas.saldo++;
+      return { limiteUsd: 5, usadoUsd: 1 };
+    },
+    rodar: async (input) => {
+      chamadas.rodar++;
+      chamadas.entrada = input;
+      return { runId: "r7", itens: [detalhe] };
+    },
+  };
+  return { cliente, chamadas };
+}
+const baixar = async (urls: string[], destino: string) => urls.map((_, i) => `${destino}/${i + 1}.jpg`);
+
+test("detalha só os leads pedidos; quem não voltou continua no lote", async () => {
   const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
   armazem.salvarLead(leadDeTeste({ slug: "um", placeId: "ChIJteste000000000000001", fase: "lote", score: 90 }));
   armazem.salvarLead(leadDeTeste({ slug: "dois", placeId: "ChIJdois", fase: "lote", score: 80 }));
-  armazem.salvarLead(leadDeTeste({ slug: "tres", placeId: "ChIJtres", fase: "candidato" }));
-  let entrada: Record<string, unknown> = {};
-  const cliente: ClienteApify = {
-    saldo: async () => ({ limiteUsd: 5, usadoUsd: 1 }),
-    rodar: async (input) => { entrada = input; return { runId: "r7", itens: [detalhe] }; },
-  };
-  const baixar = async (urls: string[], destino: string) => urls.map((_, i) => `${destino}/${i + 1}.jpg`);
-  const r = await executarDetalhes({}, { cliente, armazem, config, agora: () => new Date("2026-10-10T12:00:00Z"), baixar });
-  assert.deepEqual(entrada.placeIds, ["ChIJteste000000000000001", "ChIJdois"]);
-  assert.deepEqual(r, { detalhados: ["um"], semDados: ["dois"] });
+  armazem.salvarLead(leadDeTeste({ slug: "tres", placeId: "ChIJtres", fase: "lote", score: 99 }));
+  const { cliente, chamadas } = clienteQueAnota();
+  const r = await executarDetalhes(
+    { slugs: ["dois", "um", "um"] },
+    { cliente, armazem, config, agora: () => new Date("2026-10-10T12:00:00Z"), baixar },
+  );
+  assert.deepEqual(chamadas.entrada.placeIds, ["ChIJdois", "ChIJteste000000000000001"]);
+  assert.deepEqual(r, { detalhados: ["um"], semDados: ["dois"], jaDetalhados: [] });
   const um = armazem.listarLeads().find((l) => l.slug === "um");
   assert.equal(um?.fase, "detalhado");
   assert.deepEqual(um?.detalhes?.fotos, ["sites/public/fotos/um/1.jpg", "sites/public/fotos/um/2.jpg"]);
   assert.equal(um?.detalhes?.reviews.length, 2);
   assert.equal(armazem.listarLeads().find((l) => l.slug === "dois")?.fase, "lote");
+  assert.equal(armazem.listarLeads().find((l) => l.slug === "tres")?.fase, "lote");
   assert.equal(armazem.lerUso()[0].comando, "detalhar");
   assert.ok(Math.abs(armazem.lerUso()[0].gastoEstimadoUsd - (0.006 + 2 * 0.0005 + 2 * 0.0005)) < 1e-9);
 });
 
-test("sem lote, não chama a Apify", async () => {
+test("sem slug, slug desconhecido ou lead fora do caderno: recusa antes de chamar a Apify", async () => {
   const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
-  let chamou = false;
-  const cliente: ClienteApify = {
-    saldo: async () => { chamou = true; return { limiteUsd: 5, usadoUsd: 1 }; },
-    rodar: async () => { chamou = true; return { runId: "x", itens: [] }; },
-  };
-  const r = await executarDetalhes({}, { cliente, armazem, config, agora: () => new Date(), baixar: async () => [] });
-  assert.deepEqual(r, { detalhados: [], semDados: [] });
-  assert.equal(chamou, false);
+  armazem.salvarLead(leadDeTeste({ slug: "um", fase: "lote" }));
+  armazem.salvarLead(leadDeTeste({ slug: "cand", fase: "candidato" }));
+  const { cliente, chamadas } = clienteQueAnota();
+  const deps = { cliente, armazem, config, agora: () => new Date(), baixar };
+  await assert.rejects(executarDetalhes({ slugs: [] }, deps), /npm run detalhar -- <slug>/);
+  await assert.rejects(executarDetalhes({ slugs: ["um", "nao-existe"] }, deps), /Lead não encontrado: nao-existe/);
+  await assert.rejects(executarDetalhes({ slugs: ["cand"] }, deps), /ainda não estão no caderno.*cand/i);
+  assert.deepEqual(chamadas, { saldo: 0, rodar: 0, entrada: {} });
+});
+
+test("lead já detalhado não é pago de novo", async () => {
+  const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
+  armazem.salvarLead(leadDeTeste({ slug: "um", fase: "detalhado" }));
+  const { cliente, chamadas } = clienteQueAnota();
+  const r = await executarDetalhes({ slugs: ["um"] }, { cliente, armazem, config, agora: () => new Date(), baixar });
+  assert.deepEqual(r, { detalhados: [], semDados: [], jaDetalhados: ["um"] });
+  assert.equal(chamadas.saldo + chamadas.rodar, 0);
 });

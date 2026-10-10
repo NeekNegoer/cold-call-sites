@@ -4,6 +4,7 @@ import type { Armazem } from "./armazem.ts";
 import type { Config } from "./config.ts";
 import { converterDetalhes } from "./doApify.ts";
 import { mensagemSemSaldo, podeRodar, validarTeto } from "./custo.ts";
+import type { Lead } from "./tipos.ts";
 
 export function montarEntradaDetalhes(placeIds: string[]) {
   return {
@@ -17,7 +18,7 @@ export function montarEntradaDetalhes(placeIds: string[]) {
 }
 
 export async function executarDetalhes(
-  o: { quantidade?: number; tetoUsd?: number },
+  o: { slugs: string[]; tetoUsd?: number },
   deps: {
     cliente: ClienteApify;
     armazem: Armazem;
@@ -26,12 +27,17 @@ export async function executarDetalhes(
     baixar: (urls: string[], destinoRelativo: string) => Promise<string[]>;
   },
 ) {
-  const alvo = deps.armazem
-    .listarLeads()
-    .filter((l) => l.fase === "lote")
-    .sort((a, b) => b.score - a.score)
-    .slice(0, o.quantidade ?? deps.config.limites.lotePadrao);
-  if (alvo.length === 0) return { detalhados: [] as string[], semDados: [] as string[] };
+  // Só quem você pediu: detalhar gasta crédito da Apify, então nada é detalhado em lote.
+  const pedidos = [...new Set(o.slugs)];
+  if (pedidos.length === 0) throw new Error("Diga quais leads detalhar: npm run detalhar -- <slug> [<slug>...]");
+  const porSlug = new Map(deps.armazem.listarLeads().map((l) => [l.slug, l] as const));
+  const desconhecidos = pedidos.filter((s) => !porSlug.has(s));
+  if (desconhecidos.length) throw new Error(`Lead não encontrado: ${desconhecidos.join(", ")}`);
+  const candidatos = pedidos.filter((s) => porSlug.get(s)?.fase === "candidato");
+  if (candidatos.length) throw new Error(`Ainda não estão no caderno (rode npm run lote antes): ${candidatos.join(", ")}`);
+  const jaDetalhados = pedidos.filter((s) => porSlug.get(s)?.fase === "detalhado");
+  const alvo = pedidos.map((s) => porSlug.get(s)).filter((l): l is Lead => l?.fase === "lote");
+  if (alvo.length === 0) return { detalhados: [] as string[], semDados: [] as string[], jaDetalhados };
 
   const teto = o.tetoUsd ?? deps.config.limites.tetoUsdPorExecucao;
   validarTeto(teto);
@@ -70,5 +76,5 @@ export async function executarDetalhes(
       detalhes.reduce((s, d) => s + d.reviews.length * p.avaliacao + d.imagens.length * p.imagem, 0),
     lugares: itens.length,
   });
-  return { detalhados, semDados };
+  return { detalhados, semDados, jaDetalhados };
 }

@@ -22,9 +22,9 @@ flowchart LR
   M[Google Maps] -->|Apify| B[buscar]
   B -->|filtro e pontuação| L[lote do dia]
   L --> C[Caderno de Ligações]
-  L --> D[detalhar]
+  C -->|você escolhe| D[detalhar]
   D -->|avaliações, horário, fotos| P[prévia do site]
-  P --> C
+  P -->|link| C
   C -->|fechou| S[site final + agenda]
 ```
 
@@ -53,13 +53,13 @@ npm run lote -- --quantidade 25
 
 Separa os 25 candidatos de maior pontuação. Dá para filtrar com `--nicho` e `--cidade`.
 
-### 3. Detalhar o lote
+### 3. Detalhar quem vai ganhar prévia
 
 ```bash
-npm run detalhar
+npm run detalhar -- barbearia-exemplo
 ```
 
-Faz uma segunda busca só com os leads do lote, agora com página de detalhe: horário de funcionamento, coordenadas, até 5 avaliações e até 4 fotos, salvas em `sites/public/fotos/`. Esse material alimenta as prévias do Plano B. Custa cerca de US$0,26 para 25 leads.
+Depois de revisar o lote no caderno (passo 4), você diz quais leads vão ganhar prévia, e só esses são detalhados: horário de funcionamento, coordenadas, até 5 avaliações e até 4 fotos, salvas em `sites/public/fotos/`. Custa cerca de US$0,01 por lead. Um lead que ainda não está no caderno é recusado, e um lead já detalhado não é cobrado de novo.
 
 ### 4. Publicar o caderno
 
@@ -122,7 +122,7 @@ Comandos:
 |---|---|
 | `npm run buscar -- --nicho barbearia --cidade "São José"` | busca e pontua novos candidatos |
 | `npm run lote -- --quantidade 25` | separa o lote do dia para o caderno |
-| `npm run detalhar` | busca avaliações, horário e fotos do lote |
+| `npm run detalhar -- <slug>` | busca avaliações, horário e fotos só dos leads pedidos |
 | `npm run limpar` | apaga dados de leads perdidos ou parados há 14 dias (lê o backup exportado no caderno) |
 | `npm run painel:construir` | gera o caderno criptografado em `painel/dist/index.html` |
 | `npm run painel:local` | abre o caderno em http://localhost:4173 |
@@ -140,7 +140,7 @@ Comandos:
 
 | Item | Custo |
 |---|---|
-| Apify | grátis até US$5 por mês; um lote completo (busca de uns 80 lugares e detalhes de 25) custa cerca de US$0,60 |
+| Apify | grátis até US$5 por mês; uma busca de uns 80 lugares custa cerca de US$0,32, e cada lead detalhado, cerca de US$0,01 |
 | GitHub Pages (caderno) | grátis |
 | Cloudflare Pages | grátis |
 | Domínio `.com.br` | R$40 por ano por cliente, coberto pela manutenção mensal |
