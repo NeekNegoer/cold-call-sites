@@ -1,0 +1,130 @@
+{
+  "sufixo": "0000",
+  "placeId": "exemplo",
+  "modo": "previa",
+  "rascunho": false,
+  "agenda": "simulada",
+  "slug": "exemplo-pior-estetica",
+  "nicho": "estetica",
+  "layout": "suave",
+  "nome": "Espaço Beleza ✨ Sobrancelhas, Cílios & Micropigmentação da Dra. Ana Beatriz Wiśniewska-Kowalczyk",
+  "tema": {
+    "fundo": "#fbf5f2",
+    "superficie": "#ffffff",
+    "texto": "#3a2a2a",
+    "destaque": "#a2525a",
+    "fontes": "cormorant-nunito"
+  },
+  "textos": {
+    "titulo": "Micropigmentação fio a fio, design personalizado, lash lifting e brow lamination com hora marcada",
+    "subtitulo": "Agende online.",
+    "sobre": "",
+    "chamada": "Quero agendar meu horário agora"
+  },
+  "servicos": [
+    {
+      "nome": "Design de sobrancelha",
+      "duracaoMin": 30
+    },
+    {
+      "nome": "Design com henna",
+      "duracaoMin": 45
+    },
+    {
+      "nome": "Brow lamination",
+      "duracaoMin": 60
+    },
+    {
+      "nome": "Buço",
+      "duracaoMin": 15
+    },
+    {
+      "nome": "Micropigmentação fio a fio (inclui retoque em 30 dias)",
+      "duracaoMin": 120
+    }
+  ],
+  "profissionais": [
+    {
+      "nome": "Ana Beatriz Wiśniewska-Kowalczyk"
+    },
+    {
+      "nome": "Jô"
+    }
+  ],
+  "depoimentos": [
+    {
+      "autor": "Maria Eduarda F.",
+      "texto": "Perfeito!",
+      "nota": 5
+    },
+    {
+      "autor": "Lu",
+      "texto": "Fiz a micropigmentação e o resultado ficou natural. A Ana explica tudo antes, mostra o desenho e só começa quando você aprova. O retoque já ficou agendado.",
+      "nota": 5
+    }
+  ],
+  "fotos": [
+    {
+      "arquivo": "1.jpg",
+      "alt": "Fachada do espaço"
+    }
+  ],
+  "contato": {
+    "telefone": "+55 48 90000-0002",
+    "whatsapp": "https://wa.me/5548900000002",
+    "instagram": "@espaco.beleza.ana.beatriz.wisniewska",
+    "endereco": "Rua Exemplo, 3000, Sala 15 - Centro, Palhoça - SC",
+    "mapsUrl": "https://www.google.com/maps",
+    "horarios": {
+      "seg": [],
+      "ter": [
+        [
+          "09:00",
+          "12:00"
+        ],
+        [
+          "13:45",
+          "19:00"
+        ]
+      ],
+      "qua": [
+        [
+          "09:00",
+          "12:00"
+        ],
+        [
+          "13:45",
+          "19:00"
+        ]
+      ],
+      "qui": [
+        [
+          "09:00",
+          "12:00"
+        ],
+        [
+          "13:45",
+          "19:00"
+        ]
+      ],
+      "sex": [
+        [
+          "09:00",
+          "12:00"
+        ],
+        [
+          "13:45",
+          "19:00"
+        ]
+      ],
+      "sab": [
+        [
+          "08:00",
+          "12:00"
+        ]
+      ],
+      "dom": []
+    },
+    "horariosEstimados": false
+  }
+}

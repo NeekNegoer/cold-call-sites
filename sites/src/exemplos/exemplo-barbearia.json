@@ -1,0 +1,136 @@
+{
+  "sufixo": "0000",
+  "placeId": "exemplo",
+  "modo": "previa",
+  "rascunho": false,
+  "agenda": "simulada",
+  "slug": "exemplo-barbearia",
+  "nicho": "barbearia",
+  "layout": "classica",
+  "nome": "Barbearia Modelo",
+  "tema": {
+    "fundo": "#f4efe6",
+    "superficie": "#ffffff",
+    "texto": "#1d1a16",
+    "destaque": "#7a1f1f",
+    "fontes": "playfair-source"
+  },
+  "textos": {
+    "titulo": "Corte e barba sem fila no Centro",
+    "subtitulo": "Escolha o serviço, o barbeiro e o horário. Leva menos de um minuto.",
+    "sobre": "Desde 2015 cuidando do visual do bairro, com toalha quente, navalha e café passado na hora.",
+    "chamada": "Agendar horário"
+  },
+  "servicos": [
+    {
+      "nome": "Corte",
+      "duracaoMin": 30
+    },
+    {
+      "nome": "Barba",
+      "duracaoMin": 30
+    },
+    {
+      "nome": "Corte + barba",
+      "duracaoMin": 60
+    },
+    {
+      "nome": "Sobrancelha",
+      "duracaoMin": 15
+    }
+  ],
+  "profissionais": [
+    {
+      "nome": "Rafael"
+    },
+    {
+      "nome": "Diego"
+    }
+  ],
+  "depoimentos": [
+    {
+      "autor": "Marcos T.",
+      "texto": "Melhor degradê que já fiz. O Rafael é muito caprichoso e o ambiente é tranquilo.",
+      "nota": 5
+    },
+    {
+      "autor": "Lucas P.",
+      "texto": "Atendimento no horário marcado, sem enrolação. Virei cliente.",
+      "nota": 5
+    },
+    {
+      "autor": "André S.",
+      "texto": "Barba bem feita, toalha quente e preço justo.",
+      "nota": 4
+    }
+  ],
+  "fotos": [
+    {
+      "arquivo": "1.jpg",
+      "alt": "Fachada da Barbearia Modelo"
+    },
+    {
+      "arquivo": "2.jpg",
+      "alt": "Cadeira de barbeiro"
+    },
+    {
+      "arquivo": "3.jpg",
+      "alt": "Corte degradê pronto"
+    },
+    {
+      "arquivo": "4.jpg",
+      "alt": "Bancada com navalhas"
+    }
+  ],
+  "contato": {
+    "telefone": "+55 48 90000-0000",
+    "whatsapp": "https://wa.me/5548900000000",
+    "instagram": "@barbearia.modelo.exemplo",
+    "endereco": "Rua Exemplo, 100 - Centro, Florianópolis - SC",
+    "mapsUrl": "https://www.google.com/maps",
+    "horarios": {
+      "seg": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "ter": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "qua": [
+        [
+          "09:00",
+          "12:00"
+        ],
+        [
+          "13:30",
+          "19:00"
+        ]
+      ],
+      "qui": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "sex": [
+        [
+          "09:00",
+          "20:00"
+        ]
+      ],
+      "sab": [
+        [
+          "08:00",
+          "17:00"
+        ]
+      ],
+      "dom": []
+    },
+    "horariosEstimados": false
+  }
+}

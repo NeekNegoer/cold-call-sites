@@ -1,0 +1,106 @@
+{
+  "sufixo": "0000",
+  "placeId": "exemplo",
+  "modo": "previa",
+  "rascunho": false,
+  "agenda": "simulada",
+  "slug": "exemplo-pior-barbearia",
+  "nicho": "barbearia",
+  "layout": "classica",
+  "nome": "Barbearia & Cia \"O Rei da Navalha\" <Desde 1987> - Cortes Clássicos, Barba Terapia e Muito Mais",
+  "tema": {
+    "fundo": "#f4efe6",
+    "superficie": "#ffffff",
+    "texto": "#1d1a16",
+    "destaque": "#7a1f1f",
+    "fontes": "playfair-source"
+  },
+  "textos": {
+    "titulo": "Cortes clássicos, degradê, navalhado, pigmentação e barba terapia no coração de Coqueiros",
+    "subtitulo": "Atendemos por ordem de agendamento. Chegue com 5 minutos de antecedência para não perder o seu horário.",
+    "sobre": "",
+    "chamada": "Agendar"
+  },
+  "servicos": [
+    {
+      "nome": "Corte infantil (até 12 anos) com acabamento na navalha",
+      "duracaoMin": 30
+    },
+    {
+      "nome": "Corte + barba + sobrancelha + hidratação",
+      "duracaoMin": 90
+    },
+    {
+      "nome": "Pigmentação de barba",
+      "duracaoMin": 45
+    },
+    {
+      "nome": "Barba terapia com toalha quente e massagem facial",
+      "duracaoMin": 60
+    },
+    {
+      "nome": "Platinado",
+      "duracaoMin": 120
+    },
+    {
+      "nome": "Pezinho",
+      "duracaoMin": 15
+    }
+  ],
+  "profissionais": [],
+  "depoimentos": [
+    {
+      "autor": "Cliente do Google",
+      "texto": "Fui pela primeira vez por indicação de um amigo e gostei do resultado do corte, mas precisei esperar uns vinte minutos além do horário marcado porque o atendimento anterior atrasou. O ambiente é limpo, o café é bom e o barbeiro explicou cada etapa do degradê. Voltaria, mas espero mais pontualidade…",
+      "nota": 4
+    }
+  ],
+  "fotos": [],
+  "contato": {
+    "telefone": "+55 48 3000-0000",
+    "whatsapp": null,
+    "instagram": null,
+    "endereco": "Rodovia Governador Aderbal Ramos da Silva, 12345, Sala 1201, Bloco B - Cachoeira do Bom Jesus, Florianópolis - SC, 88056-000",
+    "mapsUrl": null,
+    "horarios": {
+      "seg": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "ter": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "qua": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "qui": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "sex": [
+        [
+          "09:00",
+          "19:00"
+        ]
+      ],
+      "sab": [
+        [
+          "09:00",
+          "17:00"
+        ]
+      ],
+      "dom": []
+    },
+    "horariosEstimados": true
+  }
+}
