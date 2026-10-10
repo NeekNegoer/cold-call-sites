@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   hojeLocal, somarDias, visaoDe, filtrarLeads, ordenarLeads, contagens, mudarStatus,
   indicadorPreco, ajustarTabela, formatarReais, dataCurta, precisaDeMotivo, precisaDePlano, TABELA_PADRAO,
+  anotar, mesclarLeads, montarBackup, importarBackup,
 } from "./logica.js";
 
 const HOJE = "2026-10-13";
@@ -116,4 +117,50 @@ test("ajuste e formato de preço", () => {
   assert.deepEqual(ajustarTabela(TABELA_PADRAO, 10), { solo: 69, equipe: 99, casaCheia: 139 });
   assert.equal(formatarReais(59), "R$ 59");
   assert.equal(formatarReais(59.9), "R$ 59,90");
+});
+
+test("anotação guarda só campos do caderno e vale por cima do arquivo publicado", () => {
+  const a = anotar({}, "x", { status: "retornar", notas: "falar com o Zé", nome: "Outro nome", atualizadoEm: "t1" });
+  assert.deepEqual(a, { x: { status: "retornar", notas: "falar com o Zé", atualizadoEm: "t1" } });
+  const b = anotar(a, "x", { proximoContato: "2026-10-20" });
+  assert.equal(b.x.notas, "falar com o Zé");
+  assert.equal(b.x.proximoContato, "2026-10-20");
+  const leads = mesclarLeads([lead()], b);
+  assert.equal(leads.get("x").nome, "X");
+  assert.equal(leads.get("x").status, "retornar");
+  assert.equal(leads.get("x").proximoContato, "2026-10-20");
+});
+
+test("anotação de lead que saiu do arquivo continua visível como arquivado", () => {
+  const leads = mesclarLeads([], { sumiu: { status: "perdeu", motivoPerda: "preco", notas: "achou caro", atualizadoEm: "t1" } });
+  const l = leads.get("sumiu");
+  assert.equal(visaoDe(l, HOJE), "arquivados");
+  assert.equal(l.notas, "achou caro");
+  assert.equal(l.limpo, true);
+});
+
+test("backup leva o status de todos os leads, anotados ou não", () => {
+  const leads = mesclarLeads([lead({ slug: "a" }), lead({ slug: "b" })], anotar({}, "b", { status: "perdeu", atualizadoEm: "t9" }));
+  const backup = montarBackup(leads.values(), { b: { status: "perdeu" } }, TABELA_PADRAO, "2026-10-13T12:00:00.000Z");
+  assert.equal(backup.exportadoEm, "2026-10-13T12:00:00.000Z");
+  assert.deepEqual(backup.status, [
+    { id: "a", status: "novo", atualizadoEm: "2026-10-09T19:00:00.000Z", limpo: false },
+    { id: "b", status: "perdeu", atualizadoEm: "t9", limpo: false },
+  ]);
+  assert.deepEqual(backup.oferta, TABELA_PADRAO);
+});
+
+test("importar backup: a anotação mais recente vence; texto estranho dá erro", () => {
+  const atuais = { a: { notas: "nova", atualizadoEm: "2026-10-12" }, b: { notas: "velha", atualizadoEm: "2026-10-01" } };
+  const texto = JSON.stringify({
+    tipo: "caderno-backup", exportadoEm: "t", oferta: { solo: 69, equipe: 99, casaCheia: 139 },
+    anotacoes: { a: { notas: "do backup", atualizadoEm: "2026-10-10" }, b: { notas: "do backup", atualizadoEm: "2026-10-10" }, c: { notas: "só no backup" } },
+  });
+  const r = importarBackup(atuais, texto);
+  assert.equal(r.anotacoes.a.notas, "nova");
+  assert.equal(r.anotacoes.b.notas, "do backup");
+  assert.equal(r.anotacoes.c.notas, "só no backup");
+  assert.deepEqual(r.oferta, { solo: 69, equipe: 99, casaCheia: 139 });
+  assert.throws(() => importarBackup(atuais, "oi"), /Backup inválido/);
+  assert.throws(() => importarBackup(atuais, "{}"), /Backup inválido/);
 });

@@ -154,3 +154,50 @@ const rotulo = (lista, id) => lista.find((x) => x.id === id)?.rotulo ?? id;
 export const rotuloStatus = (id) => rotulo(STATUS, id);
 export const rotuloMotivo = (id) => rotulo(MOTIVOS, id);
 export const rotuloPlano = (id) => rotulo(PLANOS, id);
+
+// Anotações: o que a pessoa muda no celular. Ficam no navegador, por cima dos leads publicados.
+const CAMPOS_ANOTACAO = ["status", "historico", "proximoContato", "notas", "plano", "precoMensal", "motivoPerda", "atualizadoEm"];
+
+export function anotar(anotacoes, id, patch) {
+  const campos = Object.fromEntries(Object.entries(patch).filter(([k]) => CAMPOS_ANOTACAO.includes(k)));
+  return { ...anotacoes, [id]: { ...(anotacoes[id] ?? {}), ...campos } };
+}
+
+// Lead que saiu do arquivo publicado (apagado pelo limpar) mas tem anotação continua no
+// caderno como arquivado: ficam as suas notas e o histórico, sem os dados coletados.
+export function mesclarLeads(docs, anotacoes) {
+  const leads = new Map(docs.map((d) => [d.slug, { ...d, ...(anotacoes[d.slug] ?? {}) }]));
+  for (const [id, a] of Object.entries(anotacoes)) {
+    if (!leads.has(id)) {
+      leads.set(id, {
+        slug: id, nome: null, nicho: "", cidade: "", bairro: null, telefone: null, score: 0,
+        status: "novo", historico: [], notas: "", limpo: true, ...a,
+      });
+    }
+  }
+  return leads;
+}
+
+export function montarBackup(leads, anotacoes, oferta, agoraISO) {
+  return {
+    tipo: "caderno-backup",
+    exportadoEm: agoraISO,
+    oferta,
+    anotacoes,
+    status: [...leads].map((l) => ({ id: l.slug, status: l.status, atualizadoEm: l.atualizadoEm, limpo: Boolean(l.limpo) })),
+  };
+}
+
+export function importarBackup(anotacoes, texto) {
+  let backup = null;
+  try {
+    backup = JSON.parse(texto);
+  } catch {}
+  if (!backup || backup.tipo !== "caderno-backup" || !backup.anotacoes || typeof backup.anotacoes !== "object") {
+    throw new Error("Backup inválido: cole o texto inteiro gerado em Exportar backup.");
+  }
+  const recebidas = Object.entries(backup.anotacoes).filter(
+    ([id, a]) => !anotacoes[id] || (a.atualizadoEm ?? "") >= (anotacoes[id].atualizadoEm ?? ""),
+  );
+  return { anotacoes: { ...anotacoes, ...Object.fromEntries(recebidas) }, oferta: backup.oferta ?? null };
+}
