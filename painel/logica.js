@@ -19,7 +19,9 @@ export const PLANOS = [
   { id: "equipe", rotulo: "Equipe", profissionais: "2–5 profissionais" },
   { id: "casaCheia", rotulo: "Casa cheia", profissionais: "6+ profissionais" },
 ];
-export const TABELA_PADRAO = { solo: 59, equipe: 89, casaCheia: 129 };
+// Implantação paga uma vez (site, agenda, domínio e configuração); a tabela mensal é só manutenção.
+export const IMPLANTACAO = 790;
+export const TABELA_PADRAO = { solo: 39, equipe: 59, casaCheia: 89 };
 
 const NEGOCIACAO = ["interessado", "reuniao"];
 const FINAIS = ["fechou", "perdeu"];

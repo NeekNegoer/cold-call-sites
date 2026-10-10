@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   hojeLocal, somarDias, visaoDe, filtrarLeads, ordenarLeads, contagens, mudarStatus,
-  indicadorPreco, ajustarTabela, formatarReais, dataCurta, precisaDeMotivo, precisaDePlano, TABELA_PADRAO,
+  indicadorPreco, ajustarTabela, formatarReais, dataCurta, precisaDeMotivo, precisaDePlano, TABELA_PADRAO, IMPLANTACAO,
   anotar, mesclarLeads, montarBackup, importarBackup,
 } from "./logica.js";
 
@@ -95,7 +95,7 @@ test("voltar de perdeu limpa o motivo; status desconhecido dá erro", () => {
 
 test("indicador de preço usa só decididos com a tabela atual", () => {
   const tabela = { ...TABELA_PADRAO };
-  const decidido = (i: number, status: string, motivo: string | null = null, preco = 89) =>
+  const decidido = (i: number, status: string, motivo: string | null = null, preco = TABELA_PADRAO.equipe) =>
     lead({
       slug: `d${i}`, status, plano: "equipe", precoMensal: preco, motivoPerda: motivo,
       historico: [{ status: "interessado", em: `2026-10-0${i % 9 + 1}T10:00:00Z` }, { status, em: `2026-10-1${i % 9}T10:00:00Z` }],
@@ -109,12 +109,14 @@ test("indicador de preço usa só decididos com a tabela atual", () => {
   assert.deepEqual(indicadorPreco(umaRecusa, tabela), { amostra: 10, recusasPreco: 1, sugestao: "manter" });
   const duas = [...nove.slice(1), decidido(9, "perdeu", "preco"), decidido(10, "perdeu", "preco")];
   assert.equal(indicadorPreco(duas, tabela).sugestao, "descer");
-  const outraTabela = [...nove, decidido(9, "perdeu", "preco", 79)];
+  const outraTabela = [...nove, decidido(9, "perdeu", "preco", TABELA_PADRAO.equipe - 10)];
   assert.equal(indicadorPreco(outraTabela, tabela).amostra, 9);
 });
 
 test("ajuste e formato de preço", () => {
-  assert.deepEqual(ajustarTabela(TABELA_PADRAO, 10), { solo: 69, equipe: 99, casaCheia: 139 });
+  assert.deepEqual(TABELA_PADRAO, { solo: 39, equipe: 59, casaCheia: 89 });
+  assert.deepEqual(ajustarTabela(TABELA_PADRAO, 10), { solo: 49, equipe: 69, casaCheia: 99 });
+  assert.equal(IMPLANTACAO, 790);
   assert.equal(formatarReais(59), "R$ 59");
   assert.equal(formatarReais(59.9), "R$ 59,90");
 });

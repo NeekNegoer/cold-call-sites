@@ -23,7 +23,7 @@
 - Lote padrão: 25 leads. Teto de gasto por execução: padrão US$1,00, mínimo US$0,50 (exigência da Apify). Saldo conferido antes de rodar. O gasto gravado em `leads/_sistema/uso.json` é estimado (quantidades × `precosUsd` da config), porque a Apify registra o gasto real com atraso.
 - Retenção: lead `perdeu`, ou `novo`/`sem_resposta` sem mudança há mais de 14 dias, tem os dados coletados apagados.
 - Status do painel: `novo`, `sem_resposta`, `retornar`, `interessado`, `reuniao`, `fechou`, `perdeu`. Motivos de perda: `preco`, `sem_necessidade`, `ja_tem`, `nao_decide`, `outro`.
-- Oferta: Solo (1 profissional) R$59 · Equipe (2–5) R$89 · Casa cheia (6+) R$129 por mês; sem taxa de implantação; sem fidelidade. Ajuste a cada 10 interessados decididos com a tabela atual: 0 recusas por preço → +R$10; 2 ou mais → −R$10.
+- Oferta (revisada em 2026-10-10): implantação de R$790 paga uma vez; manutenção mensal Solo (1 profissional) R$39 · Equipe (2–5) R$59 · Casa cheia (6+) R$89; sem fidelidade. Ajuste a cada 10 interessados decididos com a tabela atual: 0 recusas por preço → +R$10; 2 ou mais → −R$10.
 - WhatsApp é só contato. Nada de agendamento por WhatsApp.
 - `APIFY_TOKEN` só no `.env` (fora do git). `leads/` e `sites/public/fotos/` fora do git.
 - Textos para quem usa: português do Brasil. Datas no fuso America/Sao_Paulo.

@@ -35,16 +35,19 @@ Meta: o maior preço que ainda fecha com ~90% dos interessados.
 
 Referências: agenda sozinha custa R$30–110/mês (AppBarber R$79,90 para 1 profissional e R$109,90 para 2–5; Simples Agenda e GENDA a partir de R$39,90; Navalha R$49,90–149,90 + implantação). One-page com freelancer custa R$500–2.500 + R$50–500/mês de manutenção. Corte na Grande Florianópolis custa R$35–80.
 
-| Plano | Profissionais | Mensal | Anual (paga 10 meses) |
-|---|---|---|---|
-| Solo | 1 | R$59 | R$590 |
-| Equipe | 2–5 | R$89 | R$890 |
-| Casa cheia | 6+ | R$129 | R$1.290 |
+Implantação: **R$790**, paga uma vez na contratação, igual para todos os planos. A mensalidade é só manutenção.
 
-- Inclui: site one-page personalizado, agenda online por profissional, domínio `.com.br` em nome do cliente, hospedagem, perfil do Google ligado ao site, até 2 alterações pequenas por mês.
-- Sem taxa de implantação e sem fidelidade; o 1º mês é pago na contratação. Pagamento antecipado é a maior barreira para fechar com MEI.
-- Argumentos: custa menos que um app só de agenda e ainda inclui site e domínio; um corte a mais por mês paga o plano.
-- Os 90% são estimativa, porque não há dado público de disposição a pagar. Ajuste pelo painel (5.8): a cada 10 interessados, se nenhum recusou por preço, os próximos recebem a tabela +R$10; se 2 ou mais recusaram, −R$10.
+| Plano | Profissionais | Manutenção mensal | Anual (paga 10 meses) |
+|---|---|---|---|
+| Solo | 1 | R$39 | R$390 |
+| Equipe | 2–5 | R$59 | R$590 |
+| Casa cheia | 6+ | R$89 | R$890 |
+
+- A implantação cobre: site one-page personalizado, agenda online por profissional, domínio `.com.br` em nome do cliente, perfil do Google ligado ao site e a configuração inicial.
+- A manutenção cobre: hospedagem, renovação do domínio, agenda funcionando e até 2 alterações pequenas por mês. Sem fidelidade.
+- Mudança de 2026-10-10: antes não havia implantação e a mensalidade era R$59/89/129. Pagamento antecipado é uma barreira conhecida para fechar com MEI; o indicador de preço do painel mostra se as recusas por preço sobem.
+- Argumentos: a implantação fica no começo da faixa de um one-page com freelancer (R$500–2.500) e já inclui agenda e domínio; depois, a manutenção custa menos que um app só de agenda; um corte a mais por mês paga a manutenção.
+- Os 90% são estimativa, porque não há dado público de disposição a pagar. Ajuste pelo painel (5.8): a cada 10 interessados, se nenhum recusou por preço, os próximos recebem a tabela de manutenção +R$10; se 2 ou mais recusaram, −R$10. A implantação muda só por decisão sua.
 
 ## 3. Fora do escopo da v1
 

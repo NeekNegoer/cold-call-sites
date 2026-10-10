@@ -228,14 +228,15 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
     </section>
 
     <section class="bloco" aria-labelledby="t-tabela">
-      <h2 id="t-tabela">Tabela de preços (por mês)</h2>
+      <h2 id="t-tabela">Manutenção mensal</h2>
       <div class="tabela">
         <label for="tab-solo">Solo · 1 profissional<input id="tab-solo" type="number" inputmode="numeric" min="1" step="1"></label>
         <label for="tab-equipe">Equipe · 2–5<input id="tab-equipe" type="number" inputmode="numeric" min="1" step="1"></label>
         <label for="tab-casaCheia">Casa cheia · 6+<input id="tab-casaCheia" type="number" inputmode="numeric" min="1" step="1"></label>
       </div>
       <div class="linha"><button type="button" class="botao-sec" id="tab-salvar">Salvar tabela</button></div>
-      <p>Sem taxa de implantação. Sem fidelidade. O primeiro mês é pago na contratação.</p>
+      <p>Implantação: <strong data-implantacao></strong>, paga uma vez na contratação. Cobre o site, a agenda por profissional, o domínio .com.br e a configuração.</p>
+      <p>A mensalidade é só manutenção: hospedagem, domínio, agenda funcionando e até duas alterações pequenas por mês. Sem fidelidade.</p>
     </section>
 
     <section class="bloco" aria-labelledby="t-backup">
@@ -282,13 +283,13 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
 
     <section class="bloco" aria-labelledby="t-proposta">
       <h2 id="t-proposta">Proposta</h2>
-      <p class="fala">"Fica [valor do plano] por mês, sem taxa de implantação e sem fidelidade. Tem o site com a cara de vocês, agenda online separada por profissional, o domínio .com.br no nome de vocês e a hospedagem. Um atendimento a mais por mês já paga."</p>
-      <p>Solo <strong data-preco="solo"></strong> · Equipe <strong data-preco="equipe"></strong> · Casa cheia <strong data-preco="casaCheia"></strong></p>
+      <p class="fala">"A implantação é [valor da implantação], uma vez só: eu monto o site com a cara de vocês, a agenda online separada por profissional e o domínio .com.br no nome de vocês. Depois fica [valor do plano] por mês de manutenção, com hospedagem, domínio e até duas alterações por mês. Sem fidelidade. Um atendimento a mais por mês paga a manutenção."</p>
+      <p>Implantação <strong data-implantacao></strong> · Manutenção: Solo <strong data-preco="solo"></strong> · Equipe <strong data-preco="equipe"></strong> · Casa cheia <strong data-preco="casaCheia"></strong></p>
     </section>
 
     <section class="bloco" aria-labelledby="t-fechamento">
       <h2 id="t-fechamento">Fechamento</h2>
-      <p class="fala">"Posso deixar no ar essa semana? Você paga só o primeiro mês pra começar e eu te mando o passo a passo pra ligar a agenda."</p>
+      <p class="fala">"Posso deixar no ar essa semana? Você paga a implantação pra começar e eu te mando o passo a passo pra ligar a agenda."</p>
       <p>Se pedir para pensar: "Claro. Te mando a prévia agora e te ligo [dia] pra saber o que achou. Melhor de manhã ou à tarde?" Marque <strong>Retornar</strong> e a data.</p>
     </section>
 
@@ -297,7 +298,7 @@ legend, .campo label { font-size: 0.8rem; font-weight: 600; color: var(--muted);
       <ul>
         <li><strong>"Já tenho Instagram."</strong> "O Instagram continua. O site aparece no Google quando alguém pesquisa por [serviço] em [bairro], e o cliente agenda sozinho, até de madrugada. O link vai na bio do Insta."</li>
         <li><strong>"Marco tudo pelo WhatsApp."</strong> "Pode continuar. A agenda online é pra quem prefere marcar sozinho, e cada profissional vê a própria agenda no celular. Menos mensagem pra responder no meio do atendimento."</li>
-        <li><strong>"Tá caro" ou "agora não dá".</strong> "Não tem taxa de implantação e você cancela quando quiser. Custa menos que um app só de agenda, e aqui vem site e domínio junto. Um atendimento a mais no mês já paga." Se recusar, marque Perdeu → Preço.</li>
+        <li><strong>"Tá caro" ou "agora não dá".</strong> "A implantação é uma vez só e já deixa site, agenda e domínio prontos. Depois, a manutenção custa menos que um app só de agenda, e você cancela quando quiser. Um atendimento a mais no mês paga a mensalidade." Se recusar, marque Perdeu → Preço.</li>
         <li><strong>"Já uso Booksy, Trinks ou AppBarber."</strong> "A nossa agenda faz o mesmo e ainda vem com site e domínio próprio, por menos do que esses apps cobram só pela agenda."</li>
         <li><strong>"Me manda por WhatsApp."</strong> "Mando agora. Amanhã te ligo rapidinho pra saber o que achou: melhor de manhã ou à tarde?" Marque Retornar e a data.</li>
         <li><strong>"Preciso falar com meu sócio."</strong> "Claro. Te mando a prévia pra vocês verem juntos. Posso ligar [dia]?" Se perder, o motivo é Não decide sozinho.</li>
@@ -538,7 +539,7 @@ function abrirExtra(c, pendente) {
     ex.innerHTML = `<div class="campo"><label for="plano-${id}">Plano oferecido</label><select id="plano-${id}" class="plano-sel">${PLANOS.map(
       (p) => `<option value="${p.id}">${p.rotulo} · ${p.profissionais}</option>`,
     ).join("")}</select></div>
-      <div class="campo"><label for="preco-${id}">Preço mensal (R$)</label><input id="preco-${id}" class="preco-in" type="number" inputmode="numeric" min="1" step="1"></div>
+      <div class="campo"><label for="preco-${id}">Manutenção mensal (R$)</label><input id="preco-${id}" class="preco-in" type="number" inputmode="numeric" min="1" step="1"></div>
       <div class="linha"><button type="button" class="botao confirmar">${pendente.status ? "Salvar e marcar " + rotuloStatus(pendente.status) : "Salvar plano"}</button><button type="button" class="botao-sec cancelar">Cancelar</button></div>`;
     const sel = ex.querySelector(".plano-sel");
     const preco = ex.querySelector(".preco-in");
@@ -687,6 +688,7 @@ function renderLeads() {
 function renderRoteiro() {
   const t = estado.tabela;
   for (const el of document.querySelectorAll("[data-preco]")) el.textContent = formatarReais(t[el.dataset.preco]);
+  for (const el of document.querySelectorAll("[data-implantacao]")) el.textContent = formatarReais(IMPLANTACAO);
   for (const p of PLANOS) {
     const campo = $("#tab-" + p.id);
     if (document.activeElement !== campo) campo.value = String(t[p.id]);
