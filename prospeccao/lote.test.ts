@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { escolherLote, paraPainel } from "./lote.ts";
+import { documentosDoPainel, escolherLote, paraPainel } from "./lote.ts";
 import { leadDeTeste } from "./fixtures/lead.ts";
 
 const leads = [
@@ -36,4 +36,17 @@ test("documento do painel começa como novo, com histórico e links", () => {
 
 test("sem Instagram, sem link", () => {
   assert.equal(paraPainel(leadDeTeste({ instagram: null }), "t").data.instagramUrl, null);
+});
+
+test("exporta todo lead já escolhido para o painel, não só o último lote", () => {
+  const docs = documentosDoPainel(
+    [
+      leadDeTeste({ slug: "candidato", fase: "candidato" }),
+      leadDeTeste({ slug: "lote-anterior", fase: "lote", lote: "2026-10-08" }),
+      leadDeTeste({ slug: "detalhado", fase: "detalhado", lote: "2026-10-08" }),
+      leadDeTeste({ slug: "lote-hoje", fase: "lote", lote: "2026-10-09" }),
+    ],
+    "2026-10-09T19:00:00.000Z",
+  );
+  assert.deepEqual(docs.map((d) => d.id), ["lote-anterior", "detalhado", "lote-hoje"]);
 });

@@ -82,3 +82,9 @@ export function paraPainel(l: Lead, agoraISO: string): { id: string; data: Docum
     },
   };
 }
+
+// Todo lead que já saiu de "candidato" vai para o arquivo do painel. Quem envia pula os ids que
+// o painel já tem, então rodar o lote duas vezes antes de enviar não deixa ninguém de fora.
+export function documentosDoPainel(leads: Lead[], agoraISO: string): { id: string; data: DocumentoPainel }[] {
+  return leads.filter((l) => l.fase !== "candidato").map((l) => paraPainel(l, agoraISO));
+}

@@ -2895,7 +2895,7 @@ Expected: total estimado perto de US$0,40. Acima de US$1,50, pare e mostre os n�
 - [ ] **Step 4: Montar o lote**
 
 Run: `npm run lote -- --quantidade 25`
-Expected: "Lote de AAAA-MM-DD: 25 leads → leads/_sistema/painel-lote.json" e a tabela.
+Expected: "Lote de AAAA-MM-DD: 25 leads novos · N no arquivo do painel (leads/_sistema/painel-lote.json)" e a tabela. O arquivo traz todo lead já escolhido; o Step 5 pula os ids que o painel já tem.
 
 - [ ] **Step 5: Enviar o lote ao painel sem sobrescrever nada**
 
