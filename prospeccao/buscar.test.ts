@@ -115,3 +115,12 @@ test("máximo por termo inválido dá erro", () => {
     assert.throws(() => montarEntradaBusca({ nicho: "barbearia", cidade: "São José", maxPorTermo }, config), /max-por-termo/);
   }
 });
+
+test("slug de lead já apagado não é reutilizado por outro lugar", async () => {
+  const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
+  await executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente: clienteFalso([], [fixture[0]]).cliente, armazem, config, agora });
+  armazem.removerLead("barbearia-teste-kobrasol");
+  const outro = { ...(fixture[0] as Record<string, unknown>), placeId: "ChIJoutroLugar" };
+  const r = await executarBusca({ nicho: "barbearia", cidade: "São José" }, { cliente: clienteFalso([], [outro]).cliente, armazem, config, agora });
+  assert.deepEqual(r.novos.map((l) => l.slug), ["barbearia-teste-kobrasol-2"]);
+});

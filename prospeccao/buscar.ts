@@ -62,7 +62,11 @@ export async function executarBusca(
   const brutos = itens.map((i) => converterLugar(i, o.nicho)).filter((b) => b !== null);
   const vistos = deps.armazem.lerVistos();
   const { candidatos, descartes } = selecionarCandidatos(brutos, vistos, deps.config.cidades);
-  const slugs = new Set(deps.armazem.listarLeads().map((l) => l.slug));
+  // Slugs ficam reservados para sempre: o painel guarda o documento de um lead apagado pelo limpar.
+  const slugs = new Set([
+    ...deps.armazem.lerSistema<string[]>("slugs.json", []),
+    ...deps.armazem.listarLeads().map((l) => l.slug),
+  ]);
   const agoraISO = deps.agora().toISOString();
   const novos = candidatos.map((c): Lead => {
     const slug = gerarSlug(c.nome, slugs);
@@ -71,6 +75,7 @@ export async function executarBusca(
   });
 
   for (const l of novos) deps.armazem.salvarLead(l);
+  deps.armazem.gravarSistema("slugs.json", [...slugs].sort());
   for (const b of brutos) vistos.add(b.placeId);
   deps.armazem.salvarVistos(vistos);
 
