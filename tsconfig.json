@@ -11,7 +11,16 @@
     "allowJs": true,
     "checkJs": false,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["prospeccao/**/*.ts", "painel/**/*.ts"]
+  "include": [
+    "prospeccao/**/*.ts",
+    "painel/**/*.ts",
+    "sites/src/**/*.ts",
+    "sites/cli/**/*.ts",
+    "sites/e2e/**/*.ts",
+    "sites/*.test.ts"
+  ]
 }

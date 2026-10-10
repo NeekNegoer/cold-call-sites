@@ -8,6 +8,13 @@ senha.env
 # Dados coletados e de trabalho: nunca vão para o repositório público
 leads/
 sites/public/fotos/
+# Prévias: fichas e fotos copiadas de leads reais, clone do repo privado, saídas de build e prints
+sites/src/fichas/
+sites/src/fotos/
+sites/dist/
+sites/.saida/
+sites/.prints/
+sites/publicadas.json
 caderno-backup-*.json
 
 # Caderno gerado: clone do repositório do GitHub Pages, com os leads criptografados
