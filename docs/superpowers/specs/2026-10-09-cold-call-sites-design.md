@@ -80,8 +80,8 @@ Fluxo:
 
 1. `npm run buscar` busca no Google Maps via Apify, filtra, pontua e grava os leads em `leads/`.
 2. Claude envia o lote para o painel.
-3. `npm run detalhar` busca avaliações, fotos e horário do lote.
-4. Você revisa o lote no caderno e pede as prévias que quer; Claude gera e personaliza a ficha de cada uma (`npm run ficha`) e publica (`npm run previas:publicar`).
+3. Você revisa o lote no caderno e pede as prévias que quer.
+4. Para cada pedido, `npm run detalhar -- <slug>` busca avaliações, fotos e horário só daquele lead; Claude gera e personaliza a ficha (`npm run ficha`) e publica (`npm run previas:publicar`).
 5. O link de cada prévia aparece no painel. Você liga.
 6. Fechou: Claude refina a ficha com material do cliente, publica o site final no domínio dele e cadastra o negócio na agenda.
 
@@ -119,16 +119,18 @@ Fluxo:
 
 O lote = os N leads de maior pontuação (padrão 25).
 
-### 5.4 Detalhes (só do lote)
+### 5.4 Detalhes (só dos leads que você pedir)
 
-- Segunda execução do ator só com os placeIds do lote, com página de detalhe: horário de funcionamento, coordenadas, até 5 avaliações, até 4 fotos.
+- Segunda execução do ator só com os placeIds dos leads que você pedir (`npm run detalhar -- <slug> [<slug>...]`), com página de detalhe: horário de funcionamento, coordenadas, até 5 avaliações, até 4 fotos.
+- Só detalha lead que está no caderno (fase `lote`). Lead já detalhado não é pago de novo.
+- Mudança de 2026-10-10: antes o comando detalhava o lote inteiro. Agora detalha só quem vai ganhar prévia, para economizar crédito da Apify, tempo e tokens.
 - Fotos baixadas para `sites/public/fotos/<slug>/` (as URLs do Google podem expirar).
 - Fotos do Google aparecem só na prévia privada, com a legenda "Fotos: Google Maps". O site final usa fotos do cliente.
 
 ### 5.5 Controle de custo
 
 - Plano grátis da Apify: US$5 de crédito por mês, sem cartão. Quando acaba, as execuções param até o mês seguinte. Não existe cobrança extra.
-- Custo conferido no dry-run de 2026-10-09: ≈ US$0,58 por lote (descoberta de ~80 lugares + detalhes de 25 leads). O crédito grátis rende uns 8 lotes por mês. Detalhes em `prospeccao/apify-notas.md`.
+- Custo conferido no dry-run de 2026-10-09: ≈ US$0,32 por busca de ~80 lugares e ≈ US$0,01 por lead detalhado. Detalhes em `prospeccao/apify-notas.md`.
 - O script define um teto de gasto por execução (configurável; a Apify exige no mínimo US$0,50) e consulta o uso do mês antes de rodar. Se não houver saldo para a execução, avisa e não roda.
 - Cada execução registra o gasto estimado (quantidades × preços) em `leads/_sistema/uso.json`, porque a Apify registra o gasto real com atraso.
 

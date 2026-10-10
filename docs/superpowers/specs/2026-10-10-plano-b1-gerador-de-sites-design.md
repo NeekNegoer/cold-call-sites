@@ -23,7 +23,7 @@ Ficam para quando fechar o primeiro cliente: onde roda a agenda de um cliente de
 
 | Tema | Decisão |
 |---|---|
-| Relação com o Plano A | O A só pega leads. O B1 lê `leads/<slug>.json` e `sites/public/fotos/<slug>/` e não muda nada em `prospeccao/`. A única mudança fora de `sites/` é o `painel:construir` preencher o link da prévia. |
+| Relação com o Plano A | O A só pega leads. O B1 lê `leads/<slug>.json` e `sites/public/fotos/<slug>/`. Fora de `sites/` mudam só duas coisas: o `detalhar` passa a detalhar só os leads pedidos, e o `painel:construir` preenche o link da prévia. |
 | Quando nasce uma prévia | Sob pedido: você revisa o lote no caderno e pede no chat as prévias que quer. |
 | Variação entre prévias | Layouts por nicho (3 de barbearia, 3 de estética) + tema por lead (cores, fontes, textos, fotos). |
 | Agendar | Widget completo com fonte simulada no navegador. O B2 troca só a fonte. |
@@ -59,15 +59,18 @@ sites/
 
 ## 5. Fluxo
 
-1. O Plano A gera e detalha o lote (`buscar`, `lote`, `detalhar`, `painel:*`).
+1. O Plano A gera o lote (`buscar`, `lote`, `painel:*`). Nada é detalhado nessa hora.
 2. Você revisa no caderno e pede prévias no chat, pelo nome ou slug.
-3. `npm run ficha <slug>` cria o rascunho (seção 7).
-4. Claude personaliza a ficha e marca `rascunho: false`.
-5. `npm run sites:local` mostra as prévias e os exemplos em `http://127.0.0.1:4321`.
-6. `npm run previas:publicar` publica (seção 10).
-7. `npm run painel:construir` + `npm run painel:publicar`: o botão Prévia passa a abrir o link.
+3. `npm run detalhar -- <slug>` busca avaliações, horário e fotos só desse lead (≈ US$0,01 por lead).
+4. `npm run ficha <slug>` cria o rascunho (seção 7).
+5. Claude personaliza a ficha e marca `rascunho: false`.
+6. `npm run sites:local` mostra as prévias e os exemplos em `http://127.0.0.1:4321`.
+7. `npm run previas:publicar` publica (seção 10).
+8. `npm run painel:construir` + `npm run painel:publicar`: o botão Prévia passa a abrir o link.
 
-Para tirar uma prévia do ar: `npm run previa:remover <slug>` e depois os passos 6 e 7.
+Para tirar uma prévia do ar: `npm run previa:remover <slug>` e depois os passos 7 e 8.
+
+**`detalhar` sob pedido** (mudança no Plano A pedida em 2026-10-10): o comando recebe os slugs e só aceita leads que estão no caderno (fase `lote`). Sem slug, slug desconhecido ou lead que ainda é candidato: recusa antes de chamar a Apify. Lead já detalhado: não paga de novo.
 
 ## 6. Ficha (`sites/src/fichas/<slug>.json`)
 
@@ -130,7 +133,7 @@ Seções (uma página só, pensada primeiro para o celular):
 3. Serviços (nome e duração; preço só no modo final)
 4. Equipe (some sem profissionais)
 5. Depoimentos (somem sem avaliações)
-6. Galeria (some sem fotos)
+6. Galeria (some sem fotos), com o crédito "Fotos: Google Maps" na prévia (spec principal 5.4)
 7. Localização e horário: endereço, botão "Como chegar" (link do Maps, sem mapa incorporado), horários com o dia de hoje destacado (some com `horariosEstimados`)
 8. Rodapé: Instagram, WhatsApp, link para a privacidade
 
