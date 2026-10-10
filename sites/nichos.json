@@ -1,0 +1,38 @@
+{
+  "barbearia": {
+    "servicos": [
+      { "nome": "Corte", "duracaoMin": 30 },
+      { "nome": "Barba", "duracaoMin": 30 },
+      { "nome": "Corte + barba", "duracaoMin": 60 },
+      { "nome": "Sobrancelha", "duracaoMin": 15 }
+    ],
+    "horarioPadrao": {
+      "seg": [["09:00", "19:00"]], "ter": [["09:00", "19:00"]], "qua": [["09:00", "19:00"]], "qui": [["09:00", "19:00"]],
+      "sex": [["09:00", "19:00"]], "sab": [["09:00", "17:00"]], "dom": []
+    },
+    "textos": {
+      "titulo": "Seu corte em dia em {lugar}",
+      "subtitulo": "Escolha o serviço e o horário e agende em menos de um minuto.",
+      "sobre": "{nome} atende em {lugar}, {cidade}. Agende online, a qualquer hora.",
+      "chamada": "Agendar horário"
+    }
+  },
+  "estetica": {
+    "servicos": [
+      { "nome": "Design de sobrancelha", "duracaoMin": 30 },
+      { "nome": "Design com henna", "duracaoMin": 45 },
+      { "nome": "Brow lamination", "duracaoMin": 60 },
+      { "nome": "Buço", "duracaoMin": 15 }
+    ],
+    "horarioPadrao": {
+      "seg": [["09:00", "19:00"]], "ter": [["09:00", "19:00"]], "qua": [["09:00", "19:00"]], "qui": [["09:00", "19:00"]],
+      "sex": [["09:00", "19:00"]], "sab": [["09:00", "14:00"]], "dom": []
+    },
+    "textos": {
+      "titulo": "Sobrancelhas bem feitas em {lugar}",
+      "subtitulo": "Escolha o serviço e o horário e agende em menos de um minuto.",
+      "sobre": "{nome} atende em {lugar}, {cidade}. Agende online, a qualquer hora.",
+      "chamada": "Agendar horário"
+    }
+  }
+}
