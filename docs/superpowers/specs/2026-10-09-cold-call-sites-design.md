@@ -1,6 +1,6 @@
 # Cold call de sites — Design
 
-Data: 2026-10-09 · Status: aprovada · Rev. 4: ajustes confirmados no dry-run da Apify
+Data: 2026-10-09 · Status: aprovada · Rev. 5: Plano B dividido em B1 (sites) e B2 (agenda); a parte de sites está detalhada em [2026-10-10-plano-b1-gerador-de-sites-design.md](2026-10-10-plano-b1-gerador-de-sites-design.md)
 
 ## 1. Objetivo
 
@@ -8,7 +8,7 @@ Renda extra vendendo sites para negócios locais por ligação (cold call). O di
 
 Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de cada um, transformar a prévia em site final quando fechar e configurar a agenda do cliente.
 
-**Sucesso da v1:** um lote real de 20–30 leads da Grande Florianópolis no painel, cada um com prévia publicada e agendamento de demonstração funcionando, pronto para ligar.
+**Sucesso da v1:** um lote real de 20–30 leads da Grande Florianópolis no painel, pronto para ligar, e prévias publicadas para os leads que você escolher, com agendamento de demonstração funcionando.
 
 ## 2. Decisões
 
@@ -19,15 +19,15 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 | Público-alvo v1 | Negócios sem site, ou cujo "site" no Google é rede social, link de bio ou app de agenda. |
 | Fonte de leads | Google Maps via Apify (ator "Google Maps Scraper", plano grátis, sem cartão). A API oficial do Google foi descartada porque exige pré-pagamento de R$200. |
 | Gestão de leads | Painel (mini-CRM) numa página estática com os leads criptografados por senha, usado no celular sem login no claude.ai. |
-| Prévia | Todo lead ganha prévia personalizada (template base + ficha por lead). Interessados ganham versão caprichada. |
+| Prévia | Sob pedido: você revisa o lote no caderno e escolhe quem ganha prévia. Cada prévia é personalizada (layout do nicho + ficha e tema por lead). |
 | Agenda | Google Agenda (uma agenda por profissional) + Google Apps Script. Sem banco SQL, sem servidor. |
 | WhatsApp | Só botão de contato. Agendamento via WhatsApp fica fora e não conta como critério de prioridade. |
 | Marca | Nenhuma: você se apresenta pelo próprio nome. Prévias em subdomínio grátis. |
 | Domínio do cliente | `.com.br` no Registro.br, no CPF/CNPJ do cliente, com você como contato técnico. Custo repassado na mensalidade. |
-| Hospedagem | Cloudflare Pages (grátis). |
+| Hospedagem | Prévias: repositório privado com GitHub Pages (conta Pro). Sites de clientes: domínio e hospedagem decididos no primeiro fechamento. |
 | Stack | Node.js 24, TypeScript, Astro; Apps Script (JavaScript) com clasp. |
 | Design | Skill `frontend-design` (direção visual) + skills do Emil Kowalski em `.claude/skills/` (commit `e8a175d`, licença MIT) para acabamento, movimento, mobile e casos extremos. |
-| Ordem | Plano A (prospecção + painel) → Plano B (gerador de sites + agenda). Cada plano tem implementação própria. |
+| Ordem | Plano A (prospecção + painel) → B1 (gerador de sites) → Gmail de demonstração → B2 (agenda de demonstração) → prévia da Barbearia Fio Navalha. Cada plano tem implementação própria. |
 
 ### Oferta (pesquisada em 2026-10-09)
 
@@ -69,7 +69,7 @@ Implantação: **R$790**, paga uma vez na contratação, igual para todos os pla
 │   ├── src/fichas/      1 ficha JSON por site (prévia ou final)
 │   ├── src/layouts/     variações por nicho
 │   ├── src/components/  seções + widget de agendamento
-│   └── public/fotos/    (fora do git) fotos das prévias
+│   └── public/fotos/    (fora do git) fotos dos leads detalhados (Plano A)
 ├── agenda/              Plano B — Apps Script central (clasp)
 │   ├── src/             código do motor
 │   └── negocios/        1 config JSON por cliente + demo
@@ -80,8 +80,8 @@ Fluxo:
 
 1. `npm run buscar` busca no Google Maps via Apify, filtra, pontua e grava os leads em `leads/`.
 2. Claude envia o lote para o painel.
-3. `npm run detalhar` busca avaliações, fotos e horário do lote; Claude escreve uma ficha por lead.
-4. `npm run build` gera os sites e `npm run publicar` envia as prévias ao Cloudflare Pages.
+3. `npm run detalhar` busca avaliações, fotos e horário do lote.
+4. Você revisa o lote no caderno e pede as prévias que quer; Claude gera e personaliza a ficha de cada uma (`npm run ficha`) e publica (`npm run previas:publicar`).
 5. O link de cada prévia aparece no painel. Você liga.
 6. Fechou: Claude refina a ficha com material do cliente, publica o site final no domínio dele e cadastra o negócio na agenda.
 
@@ -213,13 +213,13 @@ Mais uma página `/privacidade` (LGPD) gerada pelo template.
 - **Config por negócio** em `agenda/negocios/<id>.json` (serviços, durações, horários, profissionais → id da agenda), versionada no git e embutida no deploy. Em produção, durações vêm só da config; o navegador nunca define duração.
 - **Modo demo** (`negocio=demo`): agendas "Profissional 1/2/3" da conta de operação; profissionais da ficha mapeados por posição; durações aceitas da requisição (só na demo); eventos marcados com o slug do lead; gatilho diário às 03:00 apaga os eventos de demo.
 - Deploy com clasp mantendo o mesmo ID de implantação, para a URL não mudar.
+- Mudança de 2026-10-10: o Gmail passa a servir só para demonstração (modo demo). Onde roda a agenda de um cliente real é decidido no primeiro fechamento, revendo o desenho acima.
 
 ### 6.6 Build e publicação
 
 - Astro estático.
-- Prévias: um projeto Cloudflare Pages, um caminho por slug, `noindex` (meta + cabeçalho). A raiz do projeto não lista nada.
-- Site final: build só daquele slug, servido na raiz do domínio do cliente, em projeto Cloudflare Pages próprio.
-- `npm run publicar` usa wrangler.
+- Prévias: repositório privado `NeekNegoer/previas` com GitHub Pages, um caminho por prévia, `noindex` (meta e robots.txt). A raiz não lista nada. Detalhes na spec do B1, seção 10.
+- Site final: build só daquele slug, servido na raiz do domínio do cliente. Hospedagem decidida no primeiro fechamento.
 
 ## 7. Testes e verificação
 
@@ -234,7 +234,7 @@ Mais uma página `/privacidade` (LGPD) gerada pelo template.
 - Token da Apify em `.env` (fora do git).
 - `leads/` e `sites/public/fotos/` fora do git.
 - Conta de operação com verificação em duas etapas.
-- Prévias: faixa de prévia, `noindex`, links com sufixo aleatório, remoção quando o lead fecha ou é perdido.
+- Prévias: faixa de prévia, `noindex`, links com sufixo aleatório, remoção sob pedido (`npm run previa:remover`).
 - LGPD: página de privacidade em todo site com agenda; coleta mínima (nome, celular, e-mail opcional); dados ficam nas agendas do cliente; você atua como operador dos dados.
 
 ## 9. Contas e setup (você)
@@ -242,8 +242,8 @@ Mais uma página `/privacidade` (LGPD) gerada pelo template.
 | Conta | Para quê | Quando |
 |---|---|---|
 | Apify (grátis, sem cartão) | Busca de leads | Plano A |
-| Gmail de operação | Demo + motor da agenda | Plano B |
-| Cloudflare | Hospedagem das prévias e sites | Plano B |
+| GitHub Pro (Student Pack) | Pages do repositório privado das prévias | B1 |
+| Gmail de demonstração | Agenda de demonstração (motor + agendas "Profissional 1/2/3") | B2 |
 
 ## 10. Riscos conhecidos
 
