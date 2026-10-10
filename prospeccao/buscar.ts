@@ -23,10 +23,14 @@ export function montarEntradaBusca(o: OpcoesBusca, config: Config) {
   if (!config.cidades.includes(o.cidade)) {
     throw new Error(`Cidade fora da região: ${o.cidade}. Use: ${config.cidades.join(", ")}.`);
   }
+  const maxPorTermo = o.maxPorTermo ?? config.limites.maxPorTermo;
+  if (!Number.isInteger(maxPorTermo) || maxPorTermo < 1) {
+    throw new Error(`--max-por-termo precisa ser um número inteiro maior que zero (recebido: ${maxPorTermo}).`);
+  }
   return {
     searchStringsArray: termos,
     locationQuery: [o.bairro, o.cidade, config.uf, "Brasil"].filter(Boolean).join(", "),
-    maxCrawledPlacesPerSearch: o.maxPorTermo ?? config.limites.maxPorTermo,
+    maxCrawledPlacesPerSearch: maxPorTermo,
     language: "pt-BR",
     scrapePlaceDetailPage: false,
     maxImages: 0,
@@ -41,6 +45,15 @@ export async function executarBusca(
   const entrada = montarEntradaBusca(o, deps.config);
   const teto = o.tetoUsd ?? deps.config.limites.tetoUsdPorExecucao;
   validarTeto(teto);
+  // Ao bater no teto a Apify para de entregar lugares e a execução pode terminar como SUCCEEDED,
+  // então a busca truncada passaria despercebida. Melhor recusar antes de gastar.
+  const maxLugares = entrada.searchStringsArray.length * entrada.maxCrawledPlacesPerSearch;
+  const gastoMaximo = maxLugares * deps.config.precosUsd.lugar;
+  if (gastoMaximo > teto) {
+    throw new Error(
+      `Esta busca pode trazer até ${maxLugares} lugares (≈ US$${gastoMaximo.toFixed(2)}), acima do teto de US$${teto.toFixed(2)}. Use menos --termos, um --max-por-termo menor ou um --teto-usd maior.`,
+    );
+  }
   const antes = await deps.cliente.saldo();
   if (!podeRodar(antes, teto)) throw new Error(mensagemSemSaldo(antes, teto));
 

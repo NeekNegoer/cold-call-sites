@@ -96,3 +96,22 @@ test("falha da Apify não grava nada", async () => {
   assert.equal(armazem.lerVistos().size, 0);
   assert.equal(armazem.lerUso().length, 0);
 });
+
+test("busca que pode passar do teto é recusada antes de chamar a Apify", async () => {
+  const armazem = criarArmazem(mkdtempSync(join(tmpdir(), "cold-")));
+  const { cliente, rodou } = clienteFalso([], fixture);
+  await assert.rejects(
+    executarBusca(
+      { nicho: "barbearia", cidade: "São José", termos: ["a", "b", "c"], maxPorTermo: 100 },
+      { cliente, armazem, config, agora },
+    ),
+    /até 300 lugares.*US\$1\.20.*teto de US\$1\.00/,
+  );
+  assert.equal(rodou(), 0);
+});
+
+test("máximo por termo inválido dá erro", () => {
+  for (const maxPorTermo of [Number.NaN, 0, -5, 2.5]) {
+    assert.throws(() => montarEntradaBusca({ nicho: "barbearia", cidade: "São José", maxPorTermo }, config), /max-por-termo/);
+  }
+});
