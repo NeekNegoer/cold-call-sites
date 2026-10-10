@@ -4,14 +4,14 @@ Ferramentas para vender sites a pequenos negócios locais por telefone. O projet
 
 Começa pela Grande Florianópolis (Florianópolis, São José, Palhoça e Biguaçu) e foi pensado para crescer para outras cidades.
 
-> **Status:** em construção. O design ([spec](docs/superpowers/specs/2026-10-09-cold-call-sites-design.md)) e o plano de implementação da primeira parte ([Plano A](docs/superpowers/plans/2026-10-09-plano-a-prospeccao-painel.md)) estão prontos. O código vem a seguir.
+> **Status:** a primeira parte ([Plano A](docs/superpowers/plans/2026-10-09-plano-a-prospeccao-painel.md): busca de leads e caderno de ligações) está pronta e em uso. A segunda (prévias, sites e agenda) ainda vai ser planejada. Design completo na [spec](docs/superpowers/specs/2026-10-09-cold-call-sites-design.md).
 
 ## Para que serve
 
 | Etapa | O que o projeto faz |
 |---|---|
 | Achar clientes | Busca negócios no Google Maps, descarta quem já tem site próprio e prioriza quem tem muitas avaliações, nota alta e celular. Quem só tem Instagram ou link de bio entra como lead quente. |
-| Ligar | Um caderno de ligações privado no claude.ai, pensado para o celular: telefone para copiar, botões de WhatsApp, Instagram e Maps, status, próximo contato, notas e roteiro de ligação. |
+| Ligar | Um caderno de ligações protegido por senha, pensado para o celular: botão de ligar, telefone para copiar, botões de WhatsApp, Instagram e Maps, status, próximo contato, notas e roteiro de ligação. |
 | Mostrar | Cada lead ganha uma prévia do próprio site, com nome, fotos, avaliações reais e agenda online de demonstração. |
 | Entregar | Quando o negócio fecha, a prévia vira o site final no domínio `.com.br` do cliente, com a agenda ligada ao Google Agenda dele. |
 
@@ -33,13 +33,13 @@ flowchart LR
 - `buscar` chama o scraper de Google Maps da [Apify](https://apify.com/compass/crawler-google-places) por nicho e cidade, no modo mais barato (sem fotos e sem avaliações).
 - Cada lugar é classificado pelo campo "site" do Google: sem site; só rede social, link de bio ou app de agenda; ou site próprio (fora desta versão).
 - A pontuação vai de 0 a 100: avaliações (até 50), nota (até 25), celular (15) e Instagram identificado (10).
-- `lote` separa os 25 melhores do dia e prepara os documentos do caderno.
+- `lote` separa os 25 melhores do dia para o caderno.
 - `detalhar` busca avaliações, horário e fotos só desses 25, para montar as prévias.
 - Toda execução confere o saldo da Apify antes de rodar, respeita um teto de gasto e registra o custo.
 
 ### 2. Caderno de Ligações (Plano A)
 
-Uma página privada publicada como artifact no claude.ai, com banco de dados próprio. O Claude grava os leads e quem liga atualiza tudo pelo celular.
+Uma página estática que abre no navegador do celular ou do computador. Os leads vão criptografados dentro dela (AES-256-GCM, chave derivada da senha com PBKDF2): sem a senha, o endereço não mostra nada. Status, notas e datas ficam salvos no próprio navegador, e um botão exporta o backup, que também alimenta a limpeza de 14 dias.
 
 - A lista segue a próxima ação: primeiro os retornos do dia, depois os leads novos por pontuação.
 - Status: novo, sem resposta, retornar, interessado, reunião, fechou e perdeu. Marcar como perdido exige o motivo.
@@ -74,21 +74,26 @@ npm install
 cp .env.example .env   # depois cole o seu APIFY_TOKEN no .env
 ```
 
-Comandos, disponíveis quando o Plano A estiver implementado:
+Para o caderno, crie também um `senha.env` com `PAINEL_SENHA=` e uma frase longa (16 caracteres ou mais). Ele é ignorado pelo git.
+
+Comandos:
 
 | Comando | O que faz |
 |---|---|
 | `npm run buscar -- --nicho barbearia --cidade "São José"` | busca e pontua novos candidatos |
 | `npm run lote -- --quantidade 25` | separa o lote do dia para o caderno |
 | `npm run detalhar` | busca avaliações, horário e fotos do lote |
-| `npm run limpar` | apaga dados de leads perdidos ou parados há 14 dias |
+| `npm run limpar` | apaga dados de leads perdidos ou parados há 14 dias (lê o backup exportado no caderno) |
+| `npm run painel:construir` | gera o caderno criptografado em `painel/dist/index.html` |
+| `npm run painel:local` | abre o caderno em http://localhost:4173 |
+| `npm run painel:publicar` | envia o caderno gerado para o repositório do GitHub Pages em `painel/dist` |
 | `npm test` | roda os testes |
 
 ## Privacidade
 
 - Nada pessoal vai para o repositório. O token fica em `.env`, os dados coletados em `leads/` e as fotos em `sites/public/fotos/`, todos ignorados pelo git.
 - Os dados coletados são um cache de trabalho curto: leads perdidos ou parados há mais de 14 dias são apagados, e ficam só o ID do lugar e as anotações de quem ligou.
-- O Caderno de Ligações é privado no claude.ai.
+- O Caderno de Ligações só abre com a senha: o arquivo publicado leva os leads criptografados, não é indexado por buscadores e não manda o endereço para os sites abertos a partir dele.
 - A Apify coleta páginas públicas do Google Maps. A seção de riscos da spec explica essa escolha e a alternativa oficial.
 
 ## Custos

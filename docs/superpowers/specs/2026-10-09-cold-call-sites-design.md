@@ -18,7 +18,7 @@ Papel do Claude: encontrar e priorizar leads, gerar a prévia personalizada de c
 | Nichos v1 | Barbearia; estética (sobrancelha, cílios, unhas, depilação, harmonização, salão de beleza). |
 | Público-alvo v1 | Negócios sem site, ou cujo "site" no Google é rede social, link de bio ou app de agenda. |
 | Fonte de leads | Google Maps via Apify (ator "Google Maps Scraper", plano grátis, sem cartão). A API oficial do Google foi descartada porque exige pré-pagamento de R$200. |
-| Gestão de leads | Painel privado no claude.ai (mini-CRM), usado no celular. |
+| Gestão de leads | Painel (mini-CRM) numa página estática com os leads criptografados por senha, usado no celular sem login no claude.ai. |
 | Prévia | Todo lead ganha prévia personalizada (template base + ficha por lead). Interessados ganham versão caprichada. |
 | Agenda | Google Agenda (uma agenda por profissional) + Google Apps Script. Sem banco SQL, sem servidor. |
 | WhatsApp | Só botão de contato. Agendamento via WhatsApp fica fora e não conta como critério de prioridade. |
@@ -145,7 +145,9 @@ Os dados vêm de página pública do Google Maps, coletada por terceiro (risco n
 
 ### 5.8 Painel (mini-CRM)
 
-- Página privada no claude.ai com banco de dados do próprio artifact. Claude grava os leads e você atualiza pelo celular.
+- Página estática publicada no GitHub Pages (e servida também em localhost). Os leads vão criptografados no arquivo (PBKDF2-SHA256 com 600 mil iterações + AES-256-GCM) e só abrem com a senha de `senha.env`; a página tem `noindex` e `no-referrer`.
+- Status, notas, datas, plano e preço ficam no navegador de quem liga, por cima dos leads publicados. O botão Exportar backup gera um arquivo que restaura tudo e que o `limpar` usa como fonte dos status.
+- Mudança de 2026-10-10: a versão no claude.ai (artifact com banco próprio) exigia login no claude.ai no celular.
 - Lista ordenada por próxima ação e pontuação, com filtros por status, nicho e cidade.
 - Cartão do lead: nome, nicho, bairro, nota (nº de avaliações), pontuação; botões Ligar (`tel:`), WhatsApp, Instagram, Maps e Prévia; status; data do próximo contato; notas com salvamento automático; histórico de mudanças de status.
 - Status: novo → sem resposta → retornar → interessado → reunião → fechou / perdeu.

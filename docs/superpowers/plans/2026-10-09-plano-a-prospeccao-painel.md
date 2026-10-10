@@ -3423,3 +3423,23 @@ git add prospeccao/limpar.ts prospeccao/limpar.test.ts prospeccao/cli/limpar.ts
 git commit -m "feat(prospeccao): add 14-day retention cleanup"
 ```
 
+
+---
+
+## Adendo de 2026-10-10: painel fora do claude.ai
+
+A pessoa não faz login no claude.ai no celular, e o artifact com `db` só abre para quem está logado. O painel virou uma página estática com os leads criptografados por senha. Este adendo substitui os passos com `Artifact`/`ArtifactData` das Tasks 9, 10 e 12.
+
+- **Senha:** `senha.env` (ignorado pelo git) com `PAINEL_SENHA=` e 16 caracteres ou mais. Claude nunca mostra o valor.
+- **Código:** `painel/cripto.js` (PBKDF2-SHA256 600k → AES-256-GCM, Web Crypto), anotações no navegador em `painel/logica.js` (`anotar`, `mesclarLeads`, `montarBackup`, `importarBackup`), build em `painel/construir.ts` + `painel/cli/construir.ts`.
+- **Publicação:** `painel/dist/` é um clone do repositório `NeekNegoer/caderno` (GitHub Pages, branch `main`, raiz). Endereço: `https://neeknegoer.github.io/caderno/`. Local: `npm run painel:local` → `http://localhost:4173`. As anotações do celular e do computador ficam separadas (cada endereço tem o seu armazenamento); para levar de um para o outro, Exportar backup num e Importar no outro.
+
+**Novo lote (troca a Task 10, Steps 4–6):**
+1. `npm run lote -- --quantidade 25`
+2. `npm run painel:construir` → "painel/dist/index.html gerado com N leads".
+3. `npm run painel:publicar` → o GitHub Pages atualiza em cerca de 1 minuto. As anotações já feitas continuam no celular.
+
+**Limpeza a cada duas semanas (troca a Task 12, Step 6):**
+1. No celular: Roteiro → Exportar backup, e mandar o arquivo para o computador.
+2. Salvar o texto do backup em `leads/_sistema/painel-status.json` (o `limpar` recusa backup com mais de 1 hora e apaga o arquivo depois de usar).
+3. `npm run limpar`, depois `npm run painel:construir` e `npm run painel:publicar` para tirar os leads apagados da página. Quem tinha anotação continua visível como arquivado.
