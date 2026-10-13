@@ -130,5 +130,6 @@ test("selo da nota do Google: aparece com nota, total e link; some sem nota", ()
   const html = pagina("exemplo-barbearia-classica");
   assert.ok(html.includes('class="nota-google"'));
   assert.ok(html.includes("4,8") && html.includes("132 avaliações"));
+  assert.match(html, /<svg[^>]*class="nota-google__logo"/);
   assert.ok(!pagina("exemplo-pior-barbearia-classica").includes('class="nota-google"'));
 });

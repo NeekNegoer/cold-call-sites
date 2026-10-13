@@ -149,6 +149,7 @@
 }
 a.nota-google:active { transform: scale(0.98); }
 .inicio--moldura .nota-google { display: flex; width: fit-content; margin-inline: auto; }
+.nota-google__logo { flex: none; width: 28px; height: 28px; }
 .nota-google__numero { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
 .nota-google__detalhe { display: grid; gap: 2px; text-align: left; }
 .nota-google__estrelas {
