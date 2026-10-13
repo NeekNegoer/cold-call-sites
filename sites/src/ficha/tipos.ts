@@ -30,6 +30,8 @@ export interface Foto {
   arquivo: string;
   alt: string;
   legenda?: string;
+  // O que manter quando o layout corta a foto (object-position), ex.: "50% 0%" = o alto da foto.
+  foco?: string;
 }
 
 export interface Tema {

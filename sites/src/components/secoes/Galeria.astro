@@ -20,7 +20,7 @@ const rolavel = variante === "faixa";
         fotos.map((f) => (
           <li class="galeria__item">
             <figure>
-              <Image src={f.imagem} alt={f.alt} widths={[400, 800]} sizes="(min-width: 900px) 33vw, 50vw" loading="lazy" />
+              <Image src={f.imagem} alt={f.alt} widths={[400, 800]} sizes="(min-width: 900px) 33vw, 50vw" loading="lazy" style={f.foco ? `object-position: ${f.foco}` : undefined} />
               {f.legenda && <figcaption>{f.legenda}</figcaption>}
             </figure>
           </li>

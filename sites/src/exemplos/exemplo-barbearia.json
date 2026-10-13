@@ -67,7 +67,8 @@
   "fotos": [
     {
       "arquivo": "1.jpg",
-      "alt": "Fachada da Barbearia Modelo"
+      "alt": "Fachada da Barbearia Modelo",
+      "foco": "50% 0%"
     },
     {
       "arquivo": "2.jpg",

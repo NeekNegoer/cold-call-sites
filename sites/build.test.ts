@@ -106,3 +106,7 @@ test("o CSS de cada layout e de cada variante foi para o build", () => {
     assert.ok(css.includes(`.${classe}`), classe);
   }
 });
+
+test("o foco da foto vira object-position na imagem principal", () => {
+  assert.ok(pagina("exemplo-barbearia-classica").includes("object-position: 50% 0%"));
+});

@@ -23,7 +23,7 @@ const { ficha, foto, variante } = Astro.props;
   {
     foto && (
       <div class="inicio__foto">
-        <Picture src={foto.imagem} alt={foto.alt} widths={[480, 800, 1200]} sizes="(min-width: 900px) 50vw, 100vw" formats={["webp"]} loading="eager" fetchpriority="high" />
+        <Picture src={foto.imagem} alt={foto.alt} widths={[480, 800, 1200]} sizes="(min-width: 900px) 50vw, 100vw" formats={["webp"]} loading="eager" fetchpriority="high" style={foto.foco ? `object-position: ${foto.foco}` : undefined} />
       </div>
     )
   }

@@ -49,3 +49,10 @@ test("fora do rascunho precisa de pelo menos um dia aberto", () => {
 test("algo que não é objeto é recusado", () => {
   assert.throws(() => validarFicha([], "x"), /a ficha precisa ser um objeto JSON/);
 });
+
+test("foco da foto (o que manter quando o layout corta): só 'x% y%' de 0 a 100", () => {
+  assert.doesNotThrow(() => validarFicha(fichaValida({ fotos: [{ arquivo: "1.jpg", alt: "Fachada", foco: "50% 0%" }] }), "x"));
+  for (const foco of ["topo", "50%", "120% 0%", "50% 0%; color: red"]) {
+    assert.throws(() => validarFicha(fichaValida({ fotos: [{ arquivo: "1.jpg", alt: "Fachada", foco }] }), "x"), /fotos\[0\]\.foco/, foco);
+  }
+});

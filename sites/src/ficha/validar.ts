@@ -6,6 +6,7 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SUFIXO = /^[a-z0-9]{4}$/;
 const HHMM = /^(?:[01]\d|2[0-3]):[0-5]\d$|^24:00$/;
 const ARQUIVO_FOTO = /^[\w-]+\.(?:jpe?g|png|webp)$/i;
+const FOCO = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
 
 type Obj = Record<string, unknown>;
 const ehObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -117,6 +118,7 @@ export function validarFicha(dado: unknown, arquivo: string): Ficha {
     exigir(typeof o.arquivo === "string" && ARQUIVO_FOTO.test(o.arquivo), `fotos[${i}].arquivo precisa ser um arquivo .jpg, .png ou .webp`);
     exigir(ehTexto(o.alt), `fotos[${i}].alt é obrigatório`);
     exigir(o.legenda === undefined || typeof o.legenda === "string", `fotos[${i}].legenda precisa ser texto`);
+    exigir(o.foco === undefined || (typeof o.foco === "string" && FOCO.test(o.foco)), `fotos[${i}].foco precisa ser "x% y%", de 0% a 100% (ex.: "50% 0%")`);
   });
 
   const c = ehObj(f.contato) ? f.contato : {};
