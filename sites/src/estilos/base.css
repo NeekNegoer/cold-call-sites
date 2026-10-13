@@ -1,47 +1,84 @@
-/* Base das prévias: o tema de cada ficha chega como variáveis no <body> (Base.astro). */
+/* Base das prévias, no jeito da Apple: fonte do sistema, hierarquia por peso e tamanho,
+   espaçamento entre letras que aperta conforme o texto cresce. O tema chega como variáveis no <body>. */
+:root {
+  --fonte-sistema: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --texto-secundario: color-mix(in srgb, var(--cor-texto) 62%, var(--cor-fundo));
+  --separador: color-mix(in srgb, var(--cor-texto) 14%, transparent);
+  --raio-grupo: 18px;
+  --largura: 1080px;
+}
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
 html:has(dialog[open]) { overflow: hidden; }
 body {
   margin: 0;
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
   background: var(--cor-fundo);
   color: var(--cor-texto);
-  font-family: var(--fonte-texto);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font: 400 1.0625rem/1.47 var(--fonte-sistema);
+  letter-spacing: -0.022em;
   overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
-h1, h2, h3 { font-family: var(--fonte-titulo); font-weight: var(--peso-titulo); line-height: 1.15; margin: 0 0 0.5em; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--fonte-sistema); font-weight: 700; margin: 0 0 0.4em; text-wrap: balance; }
+h1 { line-height: 1.05; letter-spacing: -0.035em; }
+h2 { line-height: 1.1; letter-spacing: -0.028em; }
+h3 { line-height: 1.2; letter-spacing: -0.02em; }
 p { margin: 0 0 1em; text-wrap: pretty; }
-strong { font-weight: var(--peso-forte); }
+strong { font-weight: 600; }
 img { display: block; max-width: 100%; height: auto; }
-a { color: inherit; text-underline-offset: 0.2em; }
-:focus-visible { outline: 3px solid var(--cor-destaque); outline-offset: 3px; }
+a { color: inherit; text-underline-offset: 0.18em; }
+:focus-visible { outline: 3px solid var(--cor-destaque); outline-offset: 3px; border-radius: 6px; }
+.marca { font-family: var(--fonte-marca); font-weight: var(--peso-marca); letter-spacing: 0; }
 .conteudo {
   width: 100%;
-  max-width: var(--largura, 1100px);
+  max-width: var(--largura);
   margin-inline: auto;
-  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  padding-inline: max(20px, env(safe-area-inset-left)) max(20px, env(safe-area-inset-right));
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Botão: resposta no toque (pointer-down), sem esperar soltar. */
 .botao {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
-  min-height: 48px; padding: 0.75em 1.4em;
-  border: 2px solid var(--cor-destaque); border-radius: var(--raio-botao, 999px);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 50px; padding: 0 1.4em;
+  border: 0; border-radius: 999px;
   background: var(--cor-destaque); color: var(--cor-sobre-destaque);
-  font: inherit; font-weight: var(--peso-forte); text-decoration: none; text-align: center;
+  font: 600 1.0625rem/1 var(--fonte-sistema); letter-spacing: -0.01em; text-decoration: none;
   cursor: pointer; touch-action: manipulation; user-select: none;
-  transition: transform 160ms ease-out, filter 160ms ease-out;
+  transition: transform 220ms ease-out, filter 220ms ease-out;
 }
-.botao:active { transform: scale(0.97); }
-@media (hover: hover) and (pointer: fine) { .botao:hover { filter: brightness(1.08); } }
-.botao--grande { min-height: 56px; font-size: 1.1rem; padding-inline: 1.8em; }
-.botao--contorno { background: transparent; color: var(--cor-texto); }
-.aviso-rascunho { margin: 0; padding: 10px 16px; background: #b00020; color: #ffffff; font-weight: 700; text-align: center; }
-.faixa-previa { padding: 8px 16px; background: var(--cor-texto); color: var(--cor-fundo); font-size: 0.9rem; text-align: center; }
+.botao:active { transform: scale(0.96); filter: brightness(0.92); transition-duration: 80ms; }
+.botao--grande { min-height: 54px; padding-inline: 1.8em; }
+.botao--contorno { background: transparent; color: var(--cor-texto); box-shadow: inset 0 0 0 1.5px var(--separador); }
+
+.aviso-rascunho { margin: 0; padding: 10px 20px; background: #b00020; color: #ffffff; font-weight: 600; text-align: center; }
+.faixa-previa { padding: 10px 20px; background: var(--cor-superficie); color: var(--texto-secundario); font-size: 0.8125rem; letter-spacing: -0.005em; text-align: center; }
 .faixa-previa p { margin: 0; }
+.faixa-previa strong { color: var(--cor-texto); }
+
+/* Barra fixa de agendar: material translúcido, o conteúdo passa por baixo. */
+.barra-agendar {
+  position: fixed; inset: auto 0 0; z-index: 10;
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--cor-fundo) 72%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 -0.5px 0 var(--separador);
+}
+.barra-agendar__conteudo { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.barra-agendar__nome { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 1.0625rem; }
+.barra-agendar .botao { flex: none; min-height: 44px; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+  *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .barra-agendar { background: var(--cor-fundo); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  :root { --separador: var(--cor-texto); --texto-secundario: var(--cor-texto); }
+  .barra-agendar { background: var(--cor-fundo); box-shadow: 0 -1px 0 var(--cor-texto); }
 }

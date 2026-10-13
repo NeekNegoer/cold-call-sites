@@ -1,0 +1,5 @@
+/* Moderna escura — modo escuro de verdade: a foto ocupa a tela, o título é grande e firme,
+   e as avaliações e fotos deslizam para o lado como num feed. */
+[data-layout="moderna-escura"] .inicio__titulo { font-size: clamp(2.75rem, 11vw, 5.5rem); letter-spacing: -0.04em; }
+[data-layout="moderna-escura"] .inicio__nome { color: var(--cor-destaque); }
+[data-layout="moderna-escura"] .servicos--cartoes .servico__acao { color: var(--cor-destaque); }

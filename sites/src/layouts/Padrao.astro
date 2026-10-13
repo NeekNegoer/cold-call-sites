@@ -37,5 +37,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     <Localizacao contato={ficha.contato} />
   </main>
   <Rodape ficha={ficha} privacidade={`${base}/${caminho}/privacidade/`} />
+  <div class="barra-agendar">
+    <div class="barra-agendar__conteudo conteudo">
+      <span class="barra-agendar__nome marca">{ficha.nome}</span>
+      <button type="button" class="botao" data-agendar>{ficha.textos.chamada}</button>
+    </div>
+  </div>
   <Agendar ficha={ficha} />
 </Base>

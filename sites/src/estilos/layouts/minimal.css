@@ -1,0 +1,4 @@
+/* Minimal — claro e neutro: texto e foto lado a lado, muito espaço entre as seções,
+   o verde aparece só onde se age. */
+[data-layout="minimal"] { --espaco-secao: clamp(72px, 13vw, 144px); }
+[data-layout="minimal"] .inicio__titulo { font-size: clamp(2.75rem, 10vw, 5rem); letter-spacing: -0.045em; }

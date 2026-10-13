@@ -16,11 +16,13 @@ const { servicos, variante } = Astro.props;
     <ul class="servicos__lista">
       {
         servicos.map((s) => (
-          <li class="servico">
-            <span class="servico__nome">{s.nome}</span>
-            <span class="servico__duracao">{rotuloDuracao(s.duracaoMin)}</span>
-            <button type="button" class="servico__agendar" data-agendar={s.nome} aria-label={`Agendar ${s.nome}`}>
-              Agendar
+          <li>
+            <button type="button" class="servico" data-agendar={s.nome} aria-label={`Agendar ${s.nome}, ${rotuloDuracao(s.duracaoMin)}`}>
+              <span class="servico__texto">
+                <span class="servico__nome">{s.nome}</span>
+                <span class="servico__duracao">{rotuloDuracao(s.duracaoMin)}</span>
+              </span>
+              <span class="servico__acao" aria-hidden="true">Agendar</span>
             </button>
           </li>
         ))

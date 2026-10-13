@@ -1,57 +1,75 @@
-/* Gaveta de agendamento: de baixo para cima no celular, janela no centro a partir de 720 px.
-   O <dialog> cobre a tela inteira e transparente: tocar fora da caixa fecha. */
+/* Gaveta de agendamento (folha do iOS): sobe de baixo, tem alça e se arrasta com o dedo.
+   A posição é animada pelo widget.ts com mola; aqui só a forma e o material. */
 .agenda {
   position: fixed; inset: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%;
-  margin: 0; padding: 0; border: 0; background: transparent; color: var(--cor-texto);
+  margin: 0; padding: 0; border: 0; background: transparent; color: var(--cor-texto); overflow: hidden;
 }
 .agenda[open] { display: flex; align-items: flex-end; justify-content: center; }
-.agenda::backdrop { background: rgb(0 0 0 / 0.55); }
+.agenda::backdrop { background: rgb(0 0 0 / 0.4); }
 .agenda__caixa {
-  width: 100%; max-height: min(88dvh, 720px); overflow-y: auto; overscroll-behavior: contain;
-  background: var(--cor-superficie); color: var(--cor-texto);
-  border-radius: 20px 20px 0 0; padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
-  box-shadow: 0 -8px 32px rgb(0 0 0 / 0.25);
-  animation: agenda-sobe 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex; flex-direction: column; width: 100%; max-height: min(92dvh, 760px);
+  background: var(--cor-fundo); color: var(--cor-texto);
+  border-radius: 14px 14px 0 0; box-shadow: 0 -10px 40px rgb(0 0 0 / 0.22);
+  will-change: transform;
 }
+.agenda__cabeca { flex: none; padding: 6px 12px 4px; touch-action: none; cursor: grab; }
+.agenda__cabeca:active { cursor: grabbing; }
+.agenda__puxador { width: 36px; height: 5px; margin: 0 auto 6px; border-radius: 999px; background: var(--separador); }
+.agenda__topo { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 4px; }
+.agenda__topo h2 { margin: 0; font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.022em; text-align: center; }
+.agenda__icone {
+  width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--texto-secundario);
+  font-size: 1.75rem; line-height: 1; cursor: pointer; touch-action: manipulation;
+}
+.agenda__icone:active { background: var(--separador); }
+.agenda__icone[hidden] { display: block; visibility: hidden; }
+.agenda__caixa > :not(.agenda__cabeca) { margin-inline: 16px; }
+.agenda__caixa > [data-passo], .agenda__caixa > form { overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+.agenda__aviso { margin-block: 4px 12px; padding: 12px 14px; border-radius: 12px; background: var(--cor-superficie); font-size: 0.9375rem; }
+.agenda__aviso:empty { display: none; }
 @media (min-width: 720px) {
   .agenda[open] { align-items: center; }
-  .agenda__caixa { max-width: 480px; border-radius: 16px; padding-bottom: 24px; animation-name: agenda-aparece; }
+  .agenda__caixa { max-width: 460px; max-height: min(86dvh, 720px); border-radius: 18px; }
+  .agenda__puxador { visibility: hidden; }
 }
-@keyframes agenda-sobe { from { transform: translateY(100%); } }
-@keyframes agenda-aparece { from { opacity: 0; transform: scale(0.96); } }
-@media (prefers-reduced-motion: reduce) { .agenda__caixa { animation: none; } }
 
-.agenda__topo { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin-bottom: 12px; }
-.agenda__topo h2 { margin: 0; font-size: 1.15rem; text-align: center; }
-.agenda__icone {
-  width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: inherit;
-  font-size: 1.5rem; line-height: 1; cursor: pointer; touch-action: manipulation;
-}
-.agenda__icone[hidden] { display: block; visibility: hidden; }
-.agenda__aviso { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--cor-destaque) 14%, transparent); }
-.agenda__aviso:empty { display: none; }
-.agenda__lista { display: grid; gap: 8px; }
-.agenda__dias { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
-.agenda__horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+/* Opções: grupo arredondado com separadores, como uma lista do iOS. */
+.agenda__lista { display: grid; background: var(--cor-superficie); border-radius: 14px; overflow: hidden; }
+.agenda__lista .opcao + .opcao { box-shadow: 0 -1px 0 var(--separador); }
 .opcao {
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  min-height: 48px; padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--cor-texto) 18%, transparent); border-radius: 12px;
-  background: var(--cor-fundo); color: var(--cor-texto); font: inherit; text-align: left;
-  cursor: pointer; touch-action: manipulation; user-select: none;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 52px; padding: 10px 16px; border: 0; background: transparent; color: var(--cor-texto);
+  font: inherit; letter-spacing: inherit; text-align: left; cursor: pointer; touch-action: manipulation; user-select: none;
 }
-.agenda__dias .opcao, .agenda__horas .opcao { flex-direction: column; justify-content: center; text-align: center; gap: 2px; }
-.opcao:disabled { opacity: 0.45; cursor: not-allowed; }
-.opcao__detalhe { font-size: 0.85rem; opacity: 0.8; }
-@media (hover: hover) and (pointer: fine) { .opcao:not(:disabled):hover { border-color: var(--cor-destaque); } }
-.agenda form { display: grid; gap: 12px; }
-.agenda label { display: grid; gap: 4px; font-weight: var(--peso-forte); }
+.opcao:active { background: color-mix(in srgb, var(--cor-texto) 8%, transparent); }
+.opcao__detalhe { color: var(--texto-secundario); font-size: 0.9375rem; }
+.opcao:disabled { cursor: not-allowed; }
+.opcao:disabled .opcao__texto { color: var(--texto-secundario); }
+
+/* Dias e horários: pílulas em grade. */
+.agenda__dias, .agenda__horas { display: grid; gap: 8px; }
+.agenda__dias { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.agenda__horas { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
+.agenda__dias .opcao, .agenda__horas .opcao {
+  flex-direction: column; justify-content: center; gap: 0; min-height: 56px; padding: 8px;
+  border-radius: 12px; background: var(--cor-superficie); text-align: center; font-variant-numeric: tabular-nums;
+}
+.agenda__horas .opcao { min-height: 48px; font-weight: 600; }
+.agenda__dias .opcao__detalhe { font-size: 0.8125rem; }
+.agenda__dias .opcao:disabled { background: transparent; box-shadow: inset 0 0 0 1px var(--separador); }
+
+/* Formulário */
+.agenda form { display: grid; gap: 14px; }
+.agenda label { display: grid; gap: 6px; font-size: 0.9375rem; font-weight: 600; }
 .agenda input {
-  min-height: 48px; padding: 10px 12px; border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--cor-texto) 25%, transparent);
-  background: var(--cor-fundo); color: var(--cor-texto); font: inherit; font-size: 16px; font-weight: 400;
+  min-height: 50px; padding: 0 14px; border: 0; border-radius: 12px;
+  background: var(--cor-superficie); color: var(--cor-texto);
+  font: 400 17px var(--fonte-sistema); letter-spacing: -0.022em;
 }
 .agenda__isca { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-.agenda__resumo, .agenda__confirmacao { font-weight: var(--peso-forte); }
-.agenda__demo { padding: 10px 12px; border-radius: 10px; border: 1px dashed currentColor; }
-.agenda__vazio { opacity: 0.85; }
+.agenda__resumo { margin: 4px 0 2px; font-weight: 600; }
+.agenda__confirmacao { margin: 8px 0 12px; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
+.agenda__demo { padding: 12px 14px; border-radius: 12px; background: var(--cor-superficie); color: var(--texto-secundario); font-size: 0.9375rem; }
+.agenda .botao { width: 100%; }
+.agenda__vazio { color: var(--texto-secundario); padding: 12px 0; }
+@media (prefers-contrast: more) { .agenda input { box-shadow: inset 0 0 0 1px var(--cor-texto); } }

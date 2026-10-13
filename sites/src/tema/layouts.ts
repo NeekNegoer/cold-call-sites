@@ -19,17 +19,17 @@ export interface DefinicaoLayout {
 export const LAYOUTS: readonly DefinicaoLayout[] = [
   {
     id: "classica", nome: "Clássica", nicho: "barbearia",
-    temaPadrao: { fundo: "#f4efe6", superficie: "#ffffff", texto: "#1d1a16", destaque: "#7a1f1f", fontes: "playfair-source" },
+    temaPadrao: { fundo: "#f5f5f7", superficie: "#ffffff", texto: "#1d1d1f", destaque: "#8a2a2a", fontes: "playfair-source" },
     variantes: { inicio: "moldura", servicos: "lista", depoimentos: "citacao", galeria: "grade" },
   },
   {
     id: "moderna-escura", nome: "Moderna escura", nicho: "barbearia",
-    temaPadrao: { fundo: "#111111", superficie: "#1c1c1c", texto: "#f2f2f2", destaque: "#d4a24c", fontes: "oswald-inter" },
+    temaPadrao: { fundo: "#000000", superficie: "#1c1c1e", texto: "#f5f5f7", destaque: "#e3a857", fontes: "oswald-inter" },
     variantes: { inicio: "cheia", servicos: "cartoes", depoimentos: "cartoes", galeria: "faixa" },
   },
   {
     id: "minimal", nome: "Minimal", nicho: "barbearia",
-    temaPadrao: { fundo: "#ffffff", superficie: "#f3f3f1", texto: "#141414", destaque: "#1f4d3a", fontes: "grotesk-inter" },
+    temaPadrao: { fundo: "#ffffff", superficie: "#f5f5f7", texto: "#1d1d1f", destaque: "#1f4d3a", fontes: "grotesk-inter" },
     variantes: { inicio: "dividida", servicos: "lista", depoimentos: "cartoes", galeria: "mosaico" },
   },
   {

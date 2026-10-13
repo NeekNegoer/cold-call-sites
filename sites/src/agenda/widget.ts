@@ -1,6 +1,7 @@
 import { linkTelefone, rotuloDuracao } from "../ficha/exibir.ts";
 import { resumoDoAgendamento, rotuloDia } from "./apresentar.ts";
 import { agoraEmSaoPaulo, proximosDias } from "./horarios.ts";
+import { elastico, parada, passoDaMola, projetar, type Mola } from "./mola.ts";
 import type { DadosAgenda, FonteAgenda } from "./tipos.ts";
 
 type Passo = "servico" | "profissional" | "dia" | "hora" | "dados" | "fim";
@@ -19,7 +20,12 @@ const ERROS = {
   invalido: "Confira o nome e o celular com DDD.",
 } as const;
 
+const ABRIR: Mola = { amortecimento: 1, resposta: 0.35 };
+const FECHAR: Mola = { amortecimento: 1, resposta: 0.3 };
+const VOLTAR: Mola = { amortecimento: 0.8, resposta: 0.3 };
+
 // Gaveta de agendamento. Tudo é montado com textContent: nenhum dado da ficha vira HTML.
+// Movimento como no iOS: a gaveta segue o dedo, herda a velocidade ao soltar e entra e sai pelo mesmo caminho.
 export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda, dados: DadosAgenda, agora: () => Date): void {
   const passos: Passo[] = dados.profissionais.length > 0
     ? ["servico", "profissional", "dia", "hora", "dados", "fim"]
@@ -32,6 +38,8 @@ export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda
     if (!achado) throw new Error(`Agenda sem ${seletor}`);
     return achado;
   };
+  const caixa = el(".agenda__caixa");
+  const alca = el("[data-alca]");
   const titulo = el("[data-titulo]");
   const aviso = el("[data-aviso]");
   const voltar = el<HTMLButtonElement>("[data-voltar]");
@@ -39,13 +47,104 @@ export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda
   const lista = (p: Passo) => el(`[data-lista="${p}"]`);
   const hoje = () => agoraEmSaoPaulo(agora()).data;
 
+  // --- Movimento -----------------------------------------------------------
+  const computador = () => matchMedia("(min-width: 720px)").matches;
+  const reduzido = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const altura = () => caixa.getBoundingClientRect().height;
+  const distancia = () => (computador() ? 48 : altura());
+  let posicao = 0;
+  let velocidade = 0;
+  let quadro = 0;
+  const aplicar = () => {
+    caixa.style.transform = posicao ? `translate3d(0, ${posicao}px, 0)` : "";
+    caixa.style.opacity = computador() ? String(Math.max(0, 1 - posicao / 48)) : "";
+  };
+
+  // Parte sempre de onde a gaveta está agora: dá para pegá-la no meio do caminho.
+  function animar(alvo: number, mola: Mola, aoTerminar?: () => void) {
+    cancelAnimationFrame(quadro);
+    if (reduzido()) {
+      posicao = alvo;
+      velocidade = 0;
+      aplicar();
+      aoTerminar?.();
+      return;
+    }
+    let antes = performance.now();
+    const passo = (agoraMs: number) => {
+      const dt = Math.min(0.064, (agoraMs - antes) / 1000);
+      antes = agoraMs;
+      const n = Math.max(1, Math.round(dt * 240));
+      for (let i = 0; i < n; i++) [posicao, velocidade] = passoDaMola(posicao, velocidade, alvo, mola, dt / n);
+      if (parada(posicao, velocidade, alvo)) {
+        posicao = alvo;
+        velocidade = 0;
+        aplicar();
+        aoTerminar?.();
+        return;
+      }
+      aplicar();
+      quadro = requestAnimationFrame(passo);
+    };
+    quadro = requestAnimationFrame(passo);
+  }
+
+  function abrirGaveta() {
+    dialog.showModal();
+    posicao = distancia();
+    velocidade = 0;
+    aplicar();
+    animar(0, ABRIR);
+  }
+
+  function fechar() {
+    if (!dialog.open) return;
+    animar(distancia(), FECHAR, () => {
+      dialog.close();
+      posicao = 0;
+      aplicar();
+    });
+  }
+
+  let arrasto: { id: number; inicio: number; base: number; historico: [number, number][] } | null = null;
+  alca.addEventListener("pointerdown", (e) => {
+    if ((e.target as Element).closest("button")) return;
+    cancelAnimationFrame(quadro);
+    alca.setPointerCapture(e.pointerId);
+    arrasto = { id: e.pointerId, inicio: e.clientY, base: posicao, historico: [[e.timeStamp, posicao]] };
+  });
+  alca.addEventListener("pointermove", (e) => {
+    if (!arrasto || e.pointerId !== arrasto.id) return;
+    const bruto = arrasto.base + e.clientY - arrasto.inicio;
+    posicao = bruto < 0 ? elastico(bruto, altura()) : bruto;
+    arrasto.historico = [...arrasto.historico.slice(-4), [e.timeStamp, posicao]];
+    aplicar();
+  });
+  const soltar = (e: PointerEvent) => {
+    if (!arrasto || e.pointerId !== arrasto.id) return;
+    const [t0, y0] = arrasto.historico[0];
+    const [t1, y1] = arrasto.historico[arrasto.historico.length - 1];
+    velocidade = t1 > t0 ? ((y1 - y0) / (t1 - t0)) * 1000 : 0;
+    arrasto = null;
+    // Decide pelo destino projetado, não por onde o dedo soltou: um puxão rápido fecha.
+    if (posicao + projetar(velocidade) > altura() / 2) fechar();
+    else animar(0, VOLTAR);
+  };
+  alca.addEventListener("pointerup", soltar);
+  alca.addEventListener("pointercancel", soltar);
+  dialog.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    fechar();
+  });
+
+  // --- Passos ----------------------------------------------------------------
   function mostrar(p: Passo) {
     atual = p;
     for (const s of dialog.querySelectorAll<HTMLElement>("[data-passo]")) s.hidden = s.dataset.passo !== p;
     titulo.textContent = TITULOS[p];
     voltar.hidden = p === "servico" || p === "fim";
     aviso.textContent = "";
-    dialog.querySelector<HTMLElement>(`[data-passo="${p}"] :is(button, input):not([disabled])`)?.focus();
+    dialog.querySelector<HTMLElement>(`[data-passo="${p}"] :is(button, input):not([disabled])`)?.focus({ preventScroll: true });
   }
   const seguinte = () => passos[passos.indexOf(atual) + 1];
 
@@ -125,7 +224,7 @@ export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda
         }))
         : [paragrafo("Sem horários livres neste dia. Volte e escolha outro dia.")]));
       aviso.textContent = mensagem;
-      alvo.querySelector("button")?.focus();
+      alvo.querySelector("button")?.focus({ preventScroll: true });
     } catch {
       falhou();
     }
@@ -168,9 +267,9 @@ export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda
     const anterior = passos[passos.indexOf(atual) - 1];
     if (anterior) mostrar(anterior);
   });
-  for (const b of dialog.querySelectorAll<HTMLButtonElement>("[data-fechar]")) b.addEventListener("click", () => dialog.close());
+  for (const b of dialog.querySelectorAll<HTMLButtonElement>("[data-fechar]")) b.addEventListener("click", fechar);
   dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
+    if (e.target === dialog) fechar();
   });
 
   document.addEventListener("click", (e) => {
@@ -179,7 +278,7 @@ export function iniciarAgendamento(dialog: HTMLDialogElement, fonte: FonteAgenda
     const servico = gatilho.dataset.agendar ?? "";
     Object.assign(estado, { servico: "", profissional: null, data: "", hora: "" });
     montarListas();
-    dialog.showModal();
+    abrirGaveta();
     if (servico && dados.servicos.some((s) => s.nome === servico)) {
       estado.servico = servico;
       mostrar(passos[1]);

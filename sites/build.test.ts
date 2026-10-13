@@ -97,3 +97,12 @@ test("a gaveta de agendamento vem com os dados da ficha, o aviso de demonstraç�
   assert.ok(html.includes("Agendamento de demonstração: nada foi marcado de verdade."));
   assert.ok((html.match(/data-agendar/g) ?? []).length >= 3);
 });
+
+// Tasks 11 e 12: CSS dos layouts e das variantes.
+test("o CSS de cada layout e de cada variante foi para o build", () => {
+  const css = arquivos(".css").map((f) => readFileSync(f, "utf8")).join("\n");
+  for (const l of LAYOUTS.filter((x) => x.nicho === "barbearia")) assert.match(css, new RegExp(`\\[data-layout="?${l.id}"?\\]`), l.id);
+  for (const classe of ["inicio--moldura", "inicio--cheia", "inicio--dividida", "servicos--cartoes", "depoimentos--cartoes", "galeria--faixa", "galeria--mosaico"]) {
+    assert.ok(css.includes(`.${classe}`), classe);
+  }
+});

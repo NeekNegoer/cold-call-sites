@@ -1,0 +1,5 @@
+/* Clássica — claro e quente, tudo centralizado: o nome do negócio em letra de tradição,
+   a foto num cartão grande e as avaliações como frases soltas. */
+[data-layout="classica"] .inicio__nome { font-size: 1.375rem; }
+[data-layout="classica"] .secao__titulo { text-align: center; }
+[data-layout="classica"] .depoimento { text-align: center; max-width: 30ch; margin-inline: auto; }

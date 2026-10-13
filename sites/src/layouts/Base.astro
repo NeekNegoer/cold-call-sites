@@ -1,24 +1,18 @@
 ---
-// Fontes servidas pelo próprio site (subconjunto latino): o navegador só baixa as que a página usa.
+// O texto usa a fonte do sistema (SF no iPhone). A fonte do par entra só na marca, o nome do negócio.
+// Servida pelo próprio site (subconjunto latino): o navegador só baixa a que a página usa.
 import "@fontsource/playfair-display/latin-600.css";
-import "@fontsource/source-sans-3/latin-400.css";
-import "@fontsource/source-sans-3/latin-600.css";
 import "@fontsource/oswald/latin-500.css";
-import "@fontsource/inter/latin-400.css";
-import "@fontsource/inter/latin-600.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "@fontsource/cormorant-garamond/latin-600.css";
-import "@fontsource/nunito-sans/latin-400.css";
-import "@fontsource/nunito-sans/latin-600.css";
 import "@fontsource/bodoni-moda/latin-500.css";
-import "@fontsource/jost/latin-400.css";
-import "@fontsource/jost/latin-500.css";
 import "@fontsource/dm-serif-display/latin-400.css";
-import "@fontsource/dm-sans/latin-400.css";
-import "@fontsource/dm-sans/latin-600.css";
 import "../estilos/base.css";
 import "../estilos/secoes.css";
 import "../estilos/agenda.css";
+import "../estilos/layouts/classica.css";
+import "../estilos/layouts/moderna-escura.css";
+import "../estilos/layouts/minimal.css";
 import type { Ficha } from "../ficha/tipos.ts";
 import { corDoTextoSobre } from "../tema/contraste.ts";
 import { parDeFontes } from "../tema/fontes.ts";
@@ -37,10 +31,8 @@ const variaveis: Record<string, string> = {
   "--cor-texto": ficha.tema.texto,
   "--cor-destaque": ficha.tema.destaque,
   "--cor-sobre-destaque": corDoTextoSobre(ficha.tema.destaque),
-  "--fonte-titulo": `'${fontes.titulo}', Georgia, serif`,
-  "--fonte-texto": `'${fontes.texto}', system-ui, sans-serif`,
-  "--peso-titulo": String(fontes.pesoTitulo),
-  "--peso-forte": String(fontes.pesoForte),
+  "--fonte-marca": `'${fontes.titulo}', Georgia, serif`,
+  "--peso-marca": String(fontes.pesoTitulo),
 };
 const estilo = Object.entries(variaveis).map(([k, v]) => `${k}: ${v}`).join("; ");
 ---

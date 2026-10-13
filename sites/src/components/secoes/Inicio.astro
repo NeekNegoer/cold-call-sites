@@ -15,7 +15,7 @@ const { ficha, foto, variante } = Astro.props;
 
 <section class:list={["inicio", `inicio--${variante}`, { "inicio--sem-foto": !foto }]} aria-labelledby="inicio-titulo">
   <div class="inicio__texto conteudo">
-    <p class="inicio__nome">{ficha.nome}</p>
+    <p class="inicio__nome marca">{ficha.nome}</p>
     <h1 class="inicio__titulo" id="inicio-titulo">{ficha.textos.titulo}</h1>
     <p class="inicio__subtitulo">{ficha.textos.subtitulo}</p>
     <button type="button" class="botao botao--grande" data-agendar>{ficha.textos.chamada}</button>

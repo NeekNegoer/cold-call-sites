@@ -10,10 +10,13 @@ const dados = dadosDaAgenda(Astro.props.ficha);
 
 <dialog class="agenda" data-agenda={JSON.stringify(dados)} aria-labelledby="agenda-titulo">
   <div class="agenda__caixa">
-    <div class="agenda__topo">
-      <button type="button" class="agenda__icone" data-voltar aria-label="Voltar" hidden>←</button>
-      <h2 id="agenda-titulo" data-titulo>Escolha o serviço</h2>
-      <button type="button" class="agenda__icone" data-fechar aria-label="Fechar">×</button>
+    <div class="agenda__cabeca" data-alca>
+      <div class="agenda__puxador" aria-hidden="true"></div>
+      <div class="agenda__topo">
+        <button type="button" class="agenda__icone" data-voltar aria-label="Voltar" hidden>‹</button>
+        <h2 id="agenda-titulo" data-titulo>Escolha o serviço</h2>
+        <button type="button" class="agenda__icone" data-fechar aria-label="Fechar">×</button>
+      </div>
     </div>
     <p class="agenda__aviso" data-aviso role="status" aria-live="polite"></p>
     <div data-passo="servico"><div class="agenda__lista" data-lista="servico"></div></div>
