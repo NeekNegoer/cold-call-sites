@@ -1,0 +1,78 @@
+/* Seções e variantes. Cada layout escolhe as variantes (tema/layouts.ts) e ajusta a identidade em estilos/layouts/. */
+.secao { padding-block: var(--espaco-secao, clamp(48px, 9vw, 96px)); }
+.secao__titulo { font-size: clamp(1.6rem, 5vw, 2.4rem); margin-bottom: 1em; }
+
+/* Início */
+.inicio { padding-block: clamp(32px, 7vw, 72px); }
+.inicio__nome { font-size: 0.95rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; margin-bottom: 0.75em; }
+.inicio__titulo { font-size: clamp(2.2rem, 9vw, 4.2rem); }
+.inicio__subtitulo { font-size: 1.15rem; max-width: 36ch; margin-bottom: 1.5em; }
+.inicio--moldura .inicio__foto {
+  width: min(100% - 32px, 1100px); margin: 32px auto 0; padding: 10px;
+  background: var(--cor-superficie); border-radius: var(--raio, 6px);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.12);
+}
+.inicio--moldura .inicio__foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: calc(var(--raio, 6px) - 4px); }
+.sobre { font-size: 1.1rem; max-width: 60ch; padding-block: 8px 0; }
+
+/* Serviços: lista */
+.servicos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.servico {
+  display: grid; grid-template-columns: 1fr auto; grid-template-areas: "nome agendar" "duracao agendar";
+  align-items: center; gap: 2px 16px; padding: 14px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--cor-texto) 15%, transparent);
+}
+.servico__nome { grid-area: nome; font-weight: var(--peso-forte); font-size: 1.1rem; }
+.servico__duracao { grid-area: duracao; opacity: 0.8; font-size: 0.95rem; }
+.servico__agendar {
+  grid-area: agendar; min-height: 44px; padding: 0 16px;
+  border: 1px solid var(--cor-destaque); border-radius: var(--raio-botao, 999px);
+  background: transparent; color: inherit; font: inherit; font-weight: var(--peso-forte);
+  cursor: pointer; touch-action: manipulation;
+}
+
+/* Equipe */
+.equipe__lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 24px; }
+.profissional { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.profissional__foto, .profissional__inicial { width: 112px; height: 112px; border-radius: 999px; object-fit: cover; }
+.profissional__inicial { display: grid; place-items: center; background: var(--cor-superficie); font-family: var(--fonte-titulo); font-size: 2.6rem; }
+.profissional__nome { font-weight: var(--peso-forte); }
+
+/* Depoimentos: citação */
+.depoimentos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 40px; }
+.depoimento figure { margin: 0; }
+.depoimento__nota { color: var(--cor-destaque); letter-spacing: 0.15em; margin-bottom: 0.5em; }
+.depoimento__texto { margin: 0 0 0.75em; font-family: var(--fonte-titulo); font-size: clamp(1.2rem, 4vw, 1.6rem); line-height: 1.4; }
+.depoimento__texto p { margin: 0; }
+.depoimento__autor { font-size: 0.95rem; opacity: 0.85; }
+
+/* Galeria: grade */
+.galeria__lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (min-width: 900px) { .galeria__lista { grid-template-columns: repeat(3, 1fr); } }
+.galeria__item figure { margin: 0; }
+.galeria__item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--raio, 6px); }
+.galeria__item figcaption { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+
+/* Localização e horário */
+.localizacao { background: var(--cor-superficie); }
+.localizacao__grade { display: grid; gap: 32px; }
+@media (min-width: 800px) { .localizacao__grade { grid-template-columns: 1fr 1fr; } }
+.localizacao__endereco { font-size: 1.1rem; }
+.localizacao__subtitulo { font-size: 1.3rem; }
+.horarios { margin: 0; display: grid; }
+.horarios__linha { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--cor-texto) 12%, transparent); }
+.horarios__linha dt { font-weight: var(--peso-forte); }
+.horarios__linha dd { margin: 0; text-align: right; }
+.horarios__linha[aria-current="date"] { font-weight: var(--peso-forte); }
+.horarios__linha[aria-current="date"] dt::after { content: " · hoje"; font-weight: 400; }
+
+/* Rodapé */
+.rodape { padding-block: 40px calc(40px + env(safe-area-inset-bottom)); border-top: 1px solid color-mix(in srgb, var(--cor-texto) 15%, transparent); }
+.rodape__grade { display: grid; gap: 16px; justify-items: start; }
+.rodape__nome { font-family: var(--fonte-titulo); font-size: 1.3rem; margin: 0; }
+.rodape__links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.rodape__links a { display: inline-block; padding-block: 10px; }
+.rodape__credito { margin: 0; font-size: 0.85rem; opacity: 0.85; }
+
+/* Privacidade */
+.privacidade { padding-block: 48px; max-width: 70ch; }

@@ -1,0 +1,10 @@
+---
+interface Props {
+  nome: string;
+}
+const { nome } = Astro.props;
+---
+
+<div class="faixa-previa" role="note">
+  <p>Prévia criada para <strong>{nome}</strong>. A agenda desta página é uma demonstração.</p>
+</div>

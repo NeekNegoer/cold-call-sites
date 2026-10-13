@@ -1,0 +1,35 @@
+---
+import type { Depoimento } from "../../ficha/tipos.ts";
+import type { Variantes } from "../../tema/layouts.ts";
+
+interface Props {
+  depoimentos: Depoimento[];
+  variante: Variantes["depoimentos"];
+}
+const { depoimentos, variante } = Astro.props;
+const rolavel = variante === "cartoes";
+---
+
+<section class={`secao depoimentos depoimentos--${variante}`} id="depoimentos" aria-labelledby="depoimentos-titulo">
+  <div class="conteudo">
+    <h2 class="secao__titulo" id="depoimentos-titulo">Quem já foi</h2>
+    <ul class="depoimentos__lista" tabindex={rolavel ? 0 : undefined} aria-label={rolavel ? "Avaliações (role para o lado)" : undefined}>
+      {
+        depoimentos.map((d) => (
+          <li class="depoimento">
+            <figure>
+              <p class="depoimento__nota">
+                <span aria-hidden="true">{"★".repeat(d.nota)}{"☆".repeat(5 - d.nota)}</span>
+                <span class="sr">Nota {d.nota} de 5</span>
+              </p>
+              <blockquote class="depoimento__texto">
+                <p>{d.texto}</p>
+              </blockquote>
+              <figcaption class="depoimento__autor">{d.autor}, no Google</figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

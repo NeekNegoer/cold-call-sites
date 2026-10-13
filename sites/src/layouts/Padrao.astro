@@ -1,0 +1,39 @@
+---
+import type { ImageMetadata } from "astro";
+import Depoimentos from "../components/secoes/Depoimentos.astro";
+import Equipe from "../components/secoes/Equipe.astro";
+import Faixa from "../components/secoes/Faixa.astro";
+import Galeria from "../components/secoes/Galeria.astro";
+import Inicio from "../components/secoes/Inicio.astro";
+import Localizacao from "../components/secoes/Localizacao.astro";
+import Rodape from "../components/secoes/Rodape.astro";
+import Servicos from "../components/secoes/Servicos.astro";
+import type { Imagens } from "../ficha/imagens.ts";
+import type { Ficha } from "../ficha/tipos.ts";
+import { layoutPorId } from "../tema/layouts.ts";
+import Base from "./Base.astro";
+
+interface Props {
+  ficha: Ficha;
+  imagens: Imagens<ImageMetadata>;
+  caminho: string;
+}
+const { ficha, imagens, caminho } = Astro.props;
+const v = layoutPorId(ficha.layout).variantes;
+const [principal, ...galeria] = imagens.fotos;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Base ficha={ficha} titulo={`${ficha.nome} · Agende online`}>
+  {ficha.rascunho && <p class="aviso-rascunho" role="alert">RASCUNHO: esta ficha ainda não foi personalizada e não pode ser publicada.</p>}
+  {ficha.modo === "previa" && <Faixa nome={ficha.nome} />}
+  <main>
+    <Inicio ficha={ficha} foto={principal ?? null} variante={v.inicio} />
+    <Servicos servicos={ficha.servicos} variante={v.servicos} />
+    {imagens.profissionais.length > 0 && <Equipe profissionais={imagens.profissionais} />}
+    {ficha.depoimentos.length > 0 && <Depoimentos depoimentos={ficha.depoimentos} variante={v.depoimentos} />}
+    {galeria.length > 0 && <Galeria fotos={galeria} variante={v.galeria} />}
+    <Localizacao contato={ficha.contato} />
+  </main>
+  <Rodape ficha={ficha} privacidade={`${base}/${caminho}/privacidade/`} />
+</Base>

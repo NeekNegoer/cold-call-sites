@@ -1,0 +1,11 @@
+---
+import { caminhosEstaticos } from "../../conteudo.ts";
+import Padrao from "../../layouts/Padrao.astro";
+
+export function getStaticPaths() {
+  return caminhosEstaticos();
+}
+const { ficha, imagens } = Astro.props;
+---
+
+<Padrao ficha={ficha} imagens={imagens} caminho={String(Astro.params.previa)} />

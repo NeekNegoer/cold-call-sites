@@ -1,0 +1,26 @@
+---
+import { caminhosEstaticos } from "../../conteudo.ts";
+import Base from "../../layouts/Base.astro";
+
+export function getStaticPaths() {
+  return caminhosEstaticos();
+}
+const { ficha } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Base ficha={ficha} titulo={`Privacidade · ${ficha.nome}`}>
+  <main class="privacidade conteudo">
+    <h1>Privacidade</h1>
+    <p>Esta é uma prévia de demonstração criada para {ficha.nome}. Ela não é o site oficial do negócio.</p>
+    <h2>Agendamento</h2>
+    <p>A agenda desta página é simulada. O nome, o celular e o e-mail digitados ficam só neste navegador, durante esta visita, e não são enviados a ninguém.</p>
+    <h2>Avaliações e fotos</h2>
+    <p>As avaliações e as fotos vêm do perfil público do negócio no Google Maps. O nome de quem avaliou aparece abreviado.</p>
+    <h2>Cookies e rastreamento</h2>
+    <p>Esta página não usa cookies, ferramentas de análise nem scripts de terceiros.</p>
+    <h2>Retirada</h2>
+    <p>Para pedir que esta prévia saia do ar, fale com quem enviou o link.</p>
+    <p><a class="botao" href={`${base}/${Astro.params.previa}/`}>Voltar</a></p>
+  </main>
+</Base>

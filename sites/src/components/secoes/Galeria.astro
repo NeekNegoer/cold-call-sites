@@ -1,0 +1,31 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import type { FotoComImagem } from "../../ficha/imagens.ts";
+import type { Variantes } from "../../tema/layouts.ts";
+
+interface Props {
+  fotos: FotoComImagem<ImageMetadata>[];
+  variante: Variantes["galeria"];
+}
+const { fotos, variante } = Astro.props;
+const rolavel = variante === "faixa";
+---
+
+<section class={`secao galeria galeria--${variante}`} id="galeria" aria-labelledby="galeria-titulo">
+  <div class="conteudo">
+    <h2 class="secao__titulo" id="galeria-titulo">Fotos</h2>
+    <ul class="galeria__lista" tabindex={rolavel ? 0 : undefined} aria-label={rolavel ? "Fotos (role para o lado)" : undefined}>
+      {
+        fotos.map((f) => (
+          <li class="galeria__item">
+            <figure>
+              <Image src={f.imagem} alt={f.alt} widths={[400, 800]} sizes="(min-width: 900px) 33vw, 50vw" loading="lazy" />
+              {f.legenda && <figcaption>{f.legenda}</figcaption>}
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

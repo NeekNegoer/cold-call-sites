@@ -1,0 +1,47 @@
+/* Base das prévias: o tema de cada ficha chega como variáveis no <body> (Base.astro). */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
+html:has(dialog[open]) { overflow: hidden; }
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { font-family: var(--fonte-titulo); font-weight: var(--peso-titulo); line-height: 1.15; margin: 0 0 0.5em; text-wrap: balance; }
+p { margin: 0 0 1em; text-wrap: pretty; }
+strong { font-weight: var(--peso-forte); }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-underline-offset: 0.2em; }
+:focus-visible { outline: 3px solid var(--cor-destaque); outline-offset: 3px; }
+.conteudo {
+  width: 100%;
+  max-width: var(--largura, 1100px);
+  margin-inline: auto;
+  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.botao {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  min-height: 48px; padding: 0.75em 1.4em;
+  border: 2px solid var(--cor-destaque); border-radius: var(--raio-botao, 999px);
+  background: var(--cor-destaque); color: var(--cor-sobre-destaque);
+  font: inherit; font-weight: var(--peso-forte); text-decoration: none; text-align: center;
+  cursor: pointer; touch-action: manipulation; user-select: none;
+  transition: transform 160ms ease-out, filter 160ms ease-out;
+}
+.botao:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) { .botao:hover { filter: brightness(1.08); } }
+.botao--grande { min-height: 56px; font-size: 1.1rem; padding-inline: 1.8em; }
+.botao--contorno { background: transparent; color: var(--cor-texto); }
+.aviso-rascunho { margin: 0; padding: 10px 16px; background: #b00020; color: #ffffff; font-weight: 700; text-align: center; }
+.faixa-previa { padding: 8px 16px; background: var(--cor-texto); color: var(--cor-fundo); font-size: 0.9rem; text-align: center; }
+.faixa-previa p { margin: 0; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}

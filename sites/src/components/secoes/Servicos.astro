@@ -1,0 +1,30 @@
+---
+import { rotuloDuracao } from "../../ficha/exibir.ts";
+import type { Servico } from "../../ficha/tipos.ts";
+import type { Variantes } from "../../tema/layouts.ts";
+
+interface Props {
+  servicos: Servico[];
+  variante: Variantes["servicos"];
+}
+const { servicos, variante } = Astro.props;
+---
+
+<section class={`secao servicos servicos--${variante}`} id="servicos" aria-labelledby="servicos-titulo">
+  <div class="conteudo">
+    <h2 class="secao__titulo" id="servicos-titulo">Serviços</h2>
+    <ul class="servicos__lista">
+      {
+        servicos.map((s) => (
+          <li class="servico">
+            <span class="servico__nome">{s.nome}</span>
+            <span class="servico__duracao">{rotuloDuracao(s.duracaoMin)}</span>
+            <button type="button" class="servico__agendar" data-agendar={s.nome} aria-label={`Agendar ${s.nome}`}>
+              Agendar
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+---
+import { linkInstagram, linkTelefone, telefoneLegivel } from "../../ficha/exibir.ts";
+import type { Ficha } from "../../ficha/tipos.ts";
+
+interface Props {
+  ficha: Ficha;
+  privacidade: string;
+}
+const { ficha, privacidade } = Astro.props;
+const { contato } = ficha;
+---
+
+<footer class="rodape">
+  <div class="conteudo rodape__grade">
+    <p class="rodape__nome">{ficha.nome}</p>
+    <ul class="rodape__links">
+      {contato.instagram && (
+        <li>
+          <a href={linkInstagram(contato.instagram)} target="_blank" rel="noopener noreferrer">Instagram {contato.instagram}</a>
+        </li>
+      )}
+      {contato.whatsapp && (
+        <li>
+          <a href={contato.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </li>
+      )}
+      {contato.telefone && (
+        <li>
+          <a href={linkTelefone(contato.telefone)}>{telefoneLegivel(contato.telefone)}</a>
+        </li>
+      )}
+      <li><a href={privacidade}>Privacidade</a></li>
+    </ul>
+    <button type="button" class="botao" data-agendar>{ficha.textos.chamada}</button>
+    {ficha.modo === "previa" && ficha.fotos.length > 0 && <p class="rodape__credito">Fotos: Google Maps</p>}
+  </div>
+</footer>

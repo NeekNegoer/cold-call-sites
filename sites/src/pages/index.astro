@@ -1,5 +1,11 @@
 ---
 // Raiz das prévias: publicada vazia, para ninguém descobrir quais negócios têm prévia.
+// Só no computador (modo local) ela lista as páginas, para navegar entre exemplos e prévias.
+import { caminhosEstaticos } from "../conteudo.ts";
+import { modoAtual } from "../modo.ts";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const caminhos = modoAtual() === "local" ? caminhosEstaticos().map((p) => p.params.previa) : [];
 ---
 
 <!doctype html>
@@ -11,5 +17,17 @@
     <meta name="referrer" content="no-referrer" />
     <title>Prévias</title>
   </head>
-  <body></body>
+  <body>
+    {
+      caminhos.length > 0 && (
+        <ul>
+          {caminhos.map((c) => (
+            <li>
+              <a href={`${base}/${c}/`}>{c}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </body>
 </html>

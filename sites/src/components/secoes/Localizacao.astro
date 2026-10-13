@@ -1,0 +1,50 @@
+---
+import { linhasDeHorario } from "../../ficha/exibir.ts";
+import type { Ficha } from "../../ficha/tipos.ts";
+
+interface Props {
+  contato: Ficha["contato"];
+}
+const { contato } = Astro.props;
+const linhas = contato.horariosEstimados ? [] : linhasDeHorario(contato.horarios);
+const mostrar = Boolean(contato.endereco || contato.mapsUrl || linhas.length);
+---
+
+{
+  mostrar && (
+    <section class="secao localizacao" id="localizacao" aria-labelledby="localizacao-titulo">
+      <div class="conteudo localizacao__grade">
+        <div>
+          <h2 class="secao__titulo" id="localizacao-titulo">Onde estamos</h2>
+          {contato.endereco && <p class="localizacao__endereco">{contato.endereco}</p>}
+          {contato.mapsUrl && (
+            <a class="botao botao--contorno" href={contato.mapsUrl} target="_blank" rel="noopener noreferrer">
+              Como chegar
+            </a>
+          )}
+        </div>
+        {linhas.length > 0 && (
+          <div>
+            <h3 class="localizacao__subtitulo">Horário</h3>
+            <dl class="horarios">
+              {linhas.map((l) => (
+                <div class="horarios__linha" data-dia={l.dia}>
+                  <dt>{l.nome}</dt>
+                  <dd>{l.texto}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import { agoraEmSaoPaulo, diaDaSemana } from "../../agenda/horarios.ts";
+
+  // "Hoje" segue São Paulo, como a agenda.
+  const hoje = diaDaSemana(agoraEmSaoPaulo(new Date()).data);
+  for (const linha of document.querySelectorAll(`.horarios__linha[data-dia="${hoje}"]`)) linha.setAttribute("aria-current", "date");
+</script>
