@@ -17,10 +17,10 @@
 @media (min-width: 900px) { .inicio--moldura .inicio__foto img { aspect-ratio: 16 / 9; } }
 .inicio--moldura + .sobre { text-align: center; }
 
-/* Início: cheia — texto sobre a cor da página e, logo abaixo, a foto de ponta a ponta, sem moldura nem véu. */
+/* Início: cheia — texto sobre a cor da página e, logo abaixo, a foto grande e inteira, centralizada, sem corte nem véu. */
 .inicio--cheia { padding-bottom: 0; }
-.inicio--cheia .inicio__foto { margin-top: clamp(28px, 6vw, 56px); }
-.inicio--cheia .inicio__foto img { width: 100%; height: min(78svh, 760px); object-fit: cover; }
+.inicio--cheia .inicio__foto { width: min(100% - 40px, var(--largura)); margin: clamp(28px, 6vw, 56px) auto 0; }
+.inicio--cheia .inicio__foto img { width: 100%; height: auto; border-radius: 24px; }
 
 /* Início: dividida — texto e foto lado a lado a partir de 900 px. */
 .inicio--dividida { display: grid; gap: 28px; }
