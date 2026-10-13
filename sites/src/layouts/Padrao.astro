@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from "astro";
+import Agendar from "../components/Agendar.astro";
 import Depoimentos from "../components/secoes/Depoimentos.astro";
 import Equipe from "../components/secoes/Equipe.astro";
 import Faixa from "../components/secoes/Faixa.astro";
@@ -36,4 +37,5 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     <Localizacao contato={ficha.contato} />
   </main>
   <Rodape ficha={ficha} privacidade={`${base}/${caminho}/privacidade/`} />
+  <Agendar ficha={ficha} />
 </Base>

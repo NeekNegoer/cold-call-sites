@@ -1,0 +1,49 @@
+---
+import { dadosDaAgenda } from "../agenda/apresentar.ts";
+import type { Ficha } from "../ficha/tipos.ts";
+
+interface Props {
+  ficha: Ficha;
+}
+const dados = dadosDaAgenda(Astro.props.ficha);
+---
+
+<dialog class="agenda" data-agenda={JSON.stringify(dados)} aria-labelledby="agenda-titulo">
+  <div class="agenda__caixa">
+    <div class="agenda__topo">
+      <button type="button" class="agenda__icone" data-voltar aria-label="Voltar" hidden>←</button>
+      <h2 id="agenda-titulo" data-titulo>Escolha o serviço</h2>
+      <button type="button" class="agenda__icone" data-fechar aria-label="Fechar">×</button>
+    </div>
+    <p class="agenda__aviso" data-aviso role="status" aria-live="polite"></p>
+    <div data-passo="servico"><div class="agenda__lista" data-lista="servico"></div></div>
+    <div data-passo="profissional" hidden><div class="agenda__lista" data-lista="profissional"></div></div>
+    <div data-passo="dia" hidden><div class="agenda__dias" data-lista="dia"></div></div>
+    <div data-passo="hora" hidden><div class="agenda__horas" data-lista="hora"></div></div>
+    <form data-passo="dados" data-form hidden>
+      <p class="agenda__resumo" data-resumo></p>
+      <label>Nome <input name="nome" autocomplete="name" required minlength="2" maxlength="80" /></label>
+      <label>Celular com DDD <input name="celular" type="tel" inputmode="tel" autocomplete="tel-national" required placeholder="(48) 99999-0000" /></label>
+      <label>E-mail (opcional) <input name="email" type="email" autocomplete="email" maxlength="120" /></label>
+      <label class="agenda__isca" aria-hidden="true">Site <input name="site" tabindex="-1" autocomplete="off" /></label>
+      <button type="submit" class="botao">Confirmar agendamento</button>
+    </form>
+    <div data-passo="fim" hidden>
+      <p class="agenda__confirmacao" data-confirmacao></p>
+      <p class="agenda__demo">Agendamento de demonstração: nada foi marcado de verdade.</p>
+      <button type="button" class="botao" data-fechar>Fechar</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { armazenamentoSeguro, criarFonteSimulada } from "../agenda/simulada.ts";
+  import type { DadosAgenda } from "../agenda/tipos.ts";
+  import { iniciarAgendamento } from "../agenda/widget.ts";
+
+  for (const dialog of document.querySelectorAll<HTMLDialogElement>("dialog[data-agenda]")) {
+    const dados = JSON.parse(dialog.dataset.agenda ?? "{}") as DadosAgenda;
+    const armazenamento = armazenamentoSeguro(() => window.sessionStorage);
+    iniciarAgendamento(dialog, criarFonteSimulada({ dados, armazenamento, agora: () => new Date() }), dados, () => new Date());
+  }
+</script>

@@ -79,3 +79,21 @@ test("nenhuma página ou script toca nas chaves do caderno, e toda imagem tem al
     for (const img of readFileSync(arquivo, "utf8").match(/<img\b[^>]*>/g) ?? []) assert.match(img, /\balt="[^"]+"/, `${arquivo}: ${img}`);
   }
 });
+
+// Task 10: gaveta de agendamento.
+const decodificar = (s: string) =>
+  s.replace(/&(?:quot|amp|lt|gt|#39|#(\d+));/g, (m, n?: string) =>
+    n ? String.fromCharCode(Number(n)) : ({ "&quot;": '"', "&amp;": "&", "&lt;": "<", "&gt;": ">", "&#39;": "'" } as Record<string, string>)[m]);
+
+test("a gaveta de agendamento vem com os dados da ficha, o aviso de demonstração e os botões de agendar", () => {
+  const html = pagina("exemplo-barbearia-classica");
+  assert.ok(html.includes('<dialog class="agenda"'));
+  const bruto = /data-agenda="([^"]*)"/.exec(html)?.[1];
+  assert.ok(bruto, "data-agenda ausente");
+  const dados = JSON.parse(decodificar(bruto));
+  assert.equal(dados.slug, "exemplo-barbearia");
+  assert.deepEqual(dados.servicos.map((s: { nome: string }) => s.nome), ["Corte", "Barba", "Corte + barba", "Sobrancelha"]);
+  assert.deepEqual(dados.profissionais, ["Rafael", "Diego"]);
+  assert.ok(html.includes("Agendamento de demonstração: nada foi marcado de verdade."));
+  assert.ok((html.match(/data-agendar/g) ?? []).length >= 3);
+});
