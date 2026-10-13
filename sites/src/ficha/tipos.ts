@@ -67,4 +67,6 @@ export interface Ficha {
     horariosEstimados: boolean;
   };
   agenda: "simulada" | "demo";
+  // Nota e total de avaliações do perfil no Google, mostrados no selo do Início.
+  notaGoogle?: { nota: number; avaliacoes: number } | null;
 }

@@ -35,3 +35,6 @@ export function linkTelefone(telefone: string): string {
   const d = digitosNacionais(telefone);
   return d.length === 10 || d.length === 11 ? `tel:+55${d}` : `tel:${telefone.replace(/[^\d+]/g, "")}`;
 }
+
+export const formatarNota = (nota: number) => nota.toFixed(1).replace(".", ",");
+export const rotuloAvaliacoes = (n: number) => `${n.toLocaleString("pt-BR")} ${n === 1 ? "avaliação" : "avaliações"}`;

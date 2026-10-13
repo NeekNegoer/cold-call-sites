@@ -129,6 +129,11 @@ export function validarFicha(dado: unknown, arquivo: string): Ficha {
   exigir(typeof c.horariosEstimados === "boolean", "contato.horariosEstimados precisa ser true ou false");
   erros.push(...problemasDosHorarios(c.horarios, f.rascunho === true));
   exigir(f.agenda === "simulada" || f.agenda === "demo", "agenda precisa ser simulada ou demo");
+  if (f.notaGoogle !== undefined && f.notaGoogle !== null) {
+    const g = ehObj(f.notaGoogle) ? f.notaGoogle : {};
+    exigir(typeof g.nota === "number" && g.nota >= 1 && g.nota <= 5 && inteiroEntre(g.avaliacoes, 1, 1_000_000),
+      "notaGoogle precisa de nota de 1 a 5 e avaliacoes inteiro maior que zero (ou null)");
+  }
 
   if (erros.length) throw new Error(`Ficha inválida (${arquivo}):\n- ${erros.join("\n- ")}`);
   return dado as unknown as Ficha;

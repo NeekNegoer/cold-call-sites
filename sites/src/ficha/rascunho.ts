@@ -94,6 +94,7 @@ export function rascunhoDaFicha(lead: Lead, o: { nichos: Nichos; sufixo: string;
         horariosEstimados: !convertido,
       },
       agenda: "simulada",
+      notaGoogle: lead.nota && lead.avaliacoes ? { nota: lead.nota, avaliacoes: lead.avaliacoes } : null,
     },
   };
 }

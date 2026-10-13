@@ -133,5 +133,9 @@
       "dom": []
     },
     "horariosEstimados": false
+  },
+  "notaGoogle": {
+    "nota": 4.8,
+    "avaliacoes": 132
   }
 }

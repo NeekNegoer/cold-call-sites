@@ -63,6 +63,7 @@ test("rascunho de um lead detalhado: layout e tema do nicho, serviços sem preç
   assert.deepEqual(ficha.contato.horarios.sab, [["09:00", "17:00"]]);
   assert.equal(ficha.contato.horariosEstimados, false);
   assert.equal(ficha.rascunho, true);
+  assert.deepEqual(ficha.notaGoogle, { nota: 4.7, avaliacoes: 80 });
   assert.equal(ficha.agenda, "simulada");
   assert.deepEqual(pendencias, []);
   assert.doesNotThrow(() => validarFicha(ficha, "rascunho.json"));

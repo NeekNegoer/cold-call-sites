@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatarIntervalos, linhasDeHorario, linkInstagram, linkTelefone, rotuloDuracao, telefoneLegivel } from "./exibir.ts";
+import { formatarIntervalos, formatarNota, linhasDeHorario, linkInstagram, linkTelefone, rotuloAvaliacoes, rotuloDuracao, telefoneLegivel } from "./exibir.ts";
 import { fichaValida } from "./fixtures.ts";
 
 test("horário do dia em texto", () => {
@@ -26,4 +26,12 @@ test("telefone legível e links de telefone e Instagram", () => {
   assert.equal(telefoneLegivel("0800 123 4567"), "0800 123 4567");
   assert.equal(linkTelefone("+55 48 99999-0001"), "tel:+5548999990001");
   assert.equal(linkInstagram("@fio.navalha"), "https://www.instagram.com/fio.navalha/");
+});
+
+test("nota e total de avaliações em português", () => {
+  assert.equal(formatarNota(4.8), "4,8");
+  assert.equal(formatarNota(5), "5,0");
+  assert.equal(rotuloAvaliacoes(100), "100 avaliações");
+  assert.equal(rotuloAvaliacoes(1), "1 avaliação");
+  assert.equal(rotuloAvaliacoes(1234), "1.234 avaliações");
 });

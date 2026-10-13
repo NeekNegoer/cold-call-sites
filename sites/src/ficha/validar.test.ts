@@ -61,3 +61,11 @@ test("avaliação na ficha é um trecho: no máximo 220 caracteres", () => {
   const depoimentos = [{ autor: "Ana L.", texto: "a".repeat(221), nota: 5 }];
   assert.throws(() => validarFicha(fichaValida({ depoimentos }), "x"), /depoimentos\[0\]\.texto .* 220 caracteres/);
 });
+
+test("nota do Google: opcional; nota de 1 a 5 e total inteiro de avaliações", () => {
+  assert.doesNotThrow(() => validarFicha(fichaValida({ notaGoogle: { nota: 4.8, avaliacoes: 100 } }), "x"));
+  assert.doesNotThrow(() => validarFicha(fichaValida({ notaGoogle: null }), "x"));
+  for (const notaGoogle of [{ nota: 6, avaliacoes: 10 }, { nota: 4.5, avaliacoes: 0 }, { nota: 4.5, avaliacoes: 2.5 }]) {
+    assert.throws(() => validarFicha(fichaValida({ notaGoogle }), "x"), /notaGoogle/);
+  }
+});

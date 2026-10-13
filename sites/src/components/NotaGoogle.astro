@@ -1,0 +1,27 @@
+---
+// Selo da nota no Google, no formato dos widgets de avaliação. Feito aqui: nenhum script ou logo do Google.
+import { formatarNota, rotuloAvaliacoes } from "../ficha/exibir.ts";
+
+interface Props {
+  nota: number;
+  avaliacoes: number;
+  link: string | null;
+}
+const { nota, avaliacoes, link } = Astro.props;
+const preenchido = `${Math.round((nota / 5) * 1000) / 10}%`;
+const Tag = link ? "a" : "div";
+---
+
+<Tag
+  class="nota-google"
+  href={link ?? undefined}
+  target={link ? "_blank" : undefined}
+  rel={link ? "noopener noreferrer" : undefined}
+  aria-label={`Nota ${formatarNota(nota)} de 5 no Google, ${rotuloAvaliacoes(avaliacoes)}`}
+>
+  <span class="nota-google__numero" aria-hidden="true">{formatarNota(nota)}</span>
+  <span class="nota-google__detalhe" aria-hidden="true">
+    <span class="nota-google__estrelas" style={`--preenchido: ${preenchido}`}>★★★★★</span>
+    <span class="nota-google__total">{rotuloAvaliacoes(avaliacoes)} no Google</span>
+  </span>
+</Tag>
