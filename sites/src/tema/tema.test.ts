@@ -25,5 +25,7 @@ test("todo layout tem tema padrão sem problemas, e cada nicho tem 3 layouts", (
   assert.deepEqual(layoutsDoNicho("barbearia").map((l) => l.id), ["classica", "moderna-escura", "minimal"]);
   assert.deepEqual(layoutsDoNicho("estetica").map((l) => l.id), ["suave", "luxo", "clean"]);
   assert.equal(layoutPorId("luxo").variantes.inicio, "cheia");
+  assert.equal(layoutPorId("moderna-escura").variantes.selo, "subtitulo");
+  assert.equal(layoutPorId("classica").variantes.selo, "botao");
   assert.throws(() => layoutPorId("x"), /Layout desconhecido: x/);
 });
