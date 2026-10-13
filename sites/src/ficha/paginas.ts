@@ -20,6 +20,12 @@ export function paginas(fichas: Record<string, unknown>, exemplos: Record<string
       if (ficha.slug.startsWith("exemplo-")) throw new Error(`${arquivo}: o prefixo exemplo- é reservado às fichas fictícias`);
       if (nomeDoArquivo(caminho) !== `${ficha.slug}.json`) throw new Error(`${arquivo}: o nome do arquivo precisa ser ${ficha.slug}.json`);
       lista.push({ caminho: `${ficha.slug}-${ficha.sufixo}`, ficha });
+      // No computador, a mesma ficha nos outros layouts do nicho (com o tema padrão de cada um), para comparar e escolher.
+      if (modo === "local") {
+        for (const l of layoutsDoNicho(ficha.nicho).filter((x) => x.id !== ficha.layout)) {
+          lista.push({ caminho: `${ficha.slug}-${ficha.sufixo}-${l.id}`, ficha: { ...ficha, layout: l.id, tema: l.temaPadrao } });
+        }
+      }
     }
   }
   if (modo !== "publicar") {

@@ -8,7 +8,10 @@ const exemplo = (parcial: Partial<Ficha> = {}) => fichaValida({ slug: "exemplo-x
 
 test("ficha real vira <slug>-<sufixo>; exemplo vira uma página por layout do nicho, com o tema do layout", () => {
   const p = paginas({ "./fichas/barbearia-teste.json": fichaValida() }, { "./exemplos/exemplo-x.json": exemplo() }, "local");
-  assert.deepEqual(p.map((x) => x.caminho), ["barbearia-teste-ab12", "exemplo-x-classica", "exemplo-x-minimal", "exemplo-x-moderna-escura"]);
+  assert.deepEqual(p.map((x) => x.caminho), [
+    "barbearia-teste-ab12", "barbearia-teste-ab12-minimal", "barbearia-teste-ab12-moderna-escura",
+    "exemplo-x-classica", "exemplo-x-minimal", "exemplo-x-moderna-escura",
+  ]);
   const minimal = p.find((x) => x.caminho === "exemplo-x-minimal")?.ficha;
   assert.equal(minimal?.layout, "minimal");
   assert.equal(minimal?.tema.fontes, "grotesk-inter");
@@ -30,4 +33,16 @@ test("prefixo exemplo- é reservado e o arquivo precisa se chamar <slug>.json", 
 test("duas prévias no mesmo caminho são recusadas", () => {
   const fichas = { "./fichas/barbearia-teste.json": fichaValida(), "./fichas/b/barbearia-teste.json": fichaValida() };
   assert.throws(() => paginas(fichas, {}, "publicar"), /mesmo caminho: barbearia-teste-ab12/);
+});
+
+test("no computador (modo local), a ficha real também aparece nos outros layouts do nicho, para comparar", () => {
+  const fichas = { "./fichas/barbearia-teste.json": fichaValida() };
+  assert.deepEqual(paginas(fichas, {}, "local").map((x) => x.caminho), [
+    "barbearia-teste-ab12",
+    "barbearia-teste-ab12-minimal",
+    "barbearia-teste-ab12-moderna-escura",
+  ]);
+  const escura = paginas(fichas, {}, "local").find((x) => x.caminho.endsWith("-moderna-escura"))?.ficha;
+  assert.equal(escura?.tema.fundo, "#000000");
+  assert.deepEqual(paginas(fichas, {}, "publicar").map((x) => x.caminho), ["barbearia-teste-ab12"]);
 });
