@@ -64,17 +64,34 @@
 .depoimentos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 44px; }
 .depoimento figure { margin: 0; }
 .depoimento__nota { margin-bottom: 0.6em; color: var(--cor-destaque); letter-spacing: 0.1em; font-size: 0.9375rem; }
-.depoimento__texto { margin: 0 0 0.6em; font-size: clamp(1.375rem, 4vw, 1.875rem); line-height: 1.3; letter-spacing: -0.025em; font-weight: 600; }
+.depoimento__texto { margin: 0 0 0.6em; font-size: clamp(1.25rem, 3.4vw, 1.5rem); line-height: 1.33; letter-spacing: -0.024em; font-weight: 600; }
 .depoimento__texto p { margin: 0; }
 .depoimento__autor { color: var(--texto-secundario); font-size: 0.9375rem; }
 
 /* Depoimentos: cartões que deslizam para o lado. */
 .depoimentos--cartoes .depoimentos__lista {
-  grid-auto-flow: column; grid-auto-columns: min(84%, 360px); gap: 12px;
+  grid-auto-flow: column; grid-auto-columns: min(86%, 400px); gap: 12px;
   overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; padding-bottom: 4px;
 }
 .depoimentos--cartoes .depoimento { scroll-snap-align: start; padding: 22px; border-radius: var(--raio-grupo); background: var(--cor-superficie); }
 .depoimentos--cartoes .depoimento__texto { font-size: 1.0625rem; line-height: 1.47; letter-spacing: -0.022em; font-weight: 400; }
+
+/* Controles do carrossel: setas e pontos, como as páginas do iOS. */
+.depoimentos__controles { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 18px; }
+.depoimentos__controles[hidden] { display: none; }
+.depoimentos__seta {
+  width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--cor-superficie); color: var(--cor-texto);
+  font-size: 1.6rem; line-height: 1; cursor: pointer; touch-action: manipulation; transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+.depoimentos__seta:not(:disabled):active { transform: scale(0.92); transition-duration: 80ms; }
+.depoimentos__seta:disabled { opacity: 0.3; cursor: default; }
+.depoimentos__pontos { display: flex; }
+.depoimentos__ponto { display: grid; place-items: center; width: 22px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.depoimentos__ponto::before {
+  content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--separador);
+  transition: width 220ms ease-out, background-color 220ms ease-out;
+}
+.depoimentos__ponto[aria-current="true"]::before { width: 18px; background: var(--cor-texto); }
 
 /* Galeria: grade. */
 .galeria__lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }

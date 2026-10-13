@@ -11,6 +11,7 @@ export interface ConfigNicho {
 export type Nichos = Record<Nicho, ConfigNicho>;
 
 export const MAX_DEPOIMENTO = 300;
+export const MAX_TRECHO = 160;
 
 // Quem avaliou aparece como "Carlos S.": a prévia é pública e não precisa do nome completo.
 export function abreviarAutor(nome: string): string {
@@ -28,12 +29,25 @@ export function cortarTexto(texto: string, max = MAX_DEPOIMENTO): string {
   return `${(fimDaPalavra > 0 ? corte.slice(0, fimDaPalavra) : corte).replace(/[\s,;:.!?–—-]+$/, "")}…`;
 }
 
+// Trecho de uma avaliação: frases inteiras do começo, até o limite. Sem frase que caiba, corta na palavra.
+export function trechoDe(texto: string, max = MAX_TRECHO): string {
+  const limpo = texto.replace(/\s+/g, " ").trim().replace(/^[^\p{L}\p{N}"“]+/u, "");
+  const frases = limpo.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)?.map((f) => f.trim()) ?? [];
+  let trecho = "";
+  for (const frase of frases) {
+    const junto = trecho ? `${trecho} ${frase}` : frase;
+    if (junto.length > max) break;
+    trecho = junto;
+  }
+  return trecho || cortarTexto(limpo, max);
+}
+
 export function escolherDepoimentos(reviews: { autor: string; texto: string; nota: number }[]): Depoimento[] {
   return reviews
     .filter((r) => r.texto.trim() && r.nota >= 4)
     .sort((a, b) => b.nota - a.nota || b.texto.trim().length - a.texto.trim().length)
     .slice(0, 5)
-    .map((r) => ({ autor: abreviarAutor(r.autor), texto: cortarTexto(r.texto), nota: Math.round(r.nota) }));
+    .map((r) => ({ autor: abreviarAutor(r.autor), texto: trechoDe(r.texto), nota: Math.round(r.nota) }));
 }
 
 const preencher = (modelo: string, v: Record<string, string>) => modelo.replace(/\{(\w+)\}/g, (_, k: string) => v[k] ?? `{${k}}`);

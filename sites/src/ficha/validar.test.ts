@@ -56,3 +56,8 @@ test("foco da foto (o que manter quando o layout corta): só 'x% y%' de 0 a 100"
     assert.throws(() => validarFicha(fichaValida({ fotos: [{ arquivo: "1.jpg", alt: "Fachada", foco }] }), "x"), /fotos\[0\]\.foco/, foco);
   }
 });
+
+test("avaliação na ficha é um trecho: no máximo 220 caracteres", () => {
+  const depoimentos = [{ autor: "Ana L.", texto: "a".repeat(221), nota: 5 }];
+  assert.throws(() => validarFicha(fichaValida({ depoimentos }), "x"), /depoimentos\[0\]\.texto .* 220 caracteres/);
+});

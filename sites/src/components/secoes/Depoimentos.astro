@@ -7,13 +7,18 @@ interface Props {
   variante: Variantes["depoimentos"];
 }
 const { depoimentos, variante } = Astro.props;
-const rolavel = variante === "cartoes";
+const carrossel = variante === "cartoes";
 ---
 
 <section class={`secao depoimentos depoimentos--${variante}`} id="depoimentos" aria-labelledby="depoimentos-titulo">
   <div class="conteudo">
     <h2 class="secao__titulo" id="depoimentos-titulo">Quem já foi</h2>
-    <ul class="depoimentos__lista" tabindex={rolavel ? 0 : undefined} aria-label={rolavel ? "Avaliações (role para o lado)" : undefined}>
+    <ul
+      class="depoimentos__lista"
+      data-carrossel={carrossel ? "" : undefined}
+      tabindex={carrossel ? 0 : undefined}
+      aria-label={carrossel ? "Avaliações (deslize para o lado)" : undefined}
+    >
       {
         depoimentos.map((d) => (
           <li class="depoimento">
@@ -31,5 +36,56 @@ const rolavel = variante === "cartoes";
         ))
       }
     </ul>
+    {
+      carrossel && (
+        <div class="depoimentos__controles" data-controles hidden>
+          <button type="button" class="depoimentos__seta" data-anterior aria-label="Avaliação anterior">‹</button>
+          <div class="depoimentos__pontos">
+            {depoimentos.map((_, i) => (
+              <button type="button" class="depoimentos__ponto" data-ponto={i} aria-label={`Avaliação ${i + 1} de ${depoimentos.length}`} />
+            ))}
+          </div>
+          <button type="button" class="depoimentos__seta" data-proxima aria-label="Próxima avaliação">›</button>
+        </div>
+      )
+    }
   </div>
 </section>
+
+<script>
+  import { indiceVisivel, proximoIndice } from "../../carrossel.ts";
+
+  // Carrossel de avaliações: desliza com o dedo (rolagem nativa com encaixe); setas e pontos são atalhos.
+  // Sem JavaScript, continua deslizando; os controles só aparecem quando há o que rolar.
+  for (const lista of document.querySelectorAll<HTMLElement>("[data-carrossel]")) {
+    const controles = lista.parentElement?.querySelector<HTMLElement>("[data-controles]");
+    const anterior = controles?.querySelector<HTMLButtonElement>("[data-anterior]");
+    const proxima = controles?.querySelector<HTMLButtonElement>("[data-proxima]");
+    if (!controles || !anterior || !proxima) continue;
+    const cartoes = [...lista.children] as HTMLElement[];
+    const pontos = [...controles.querySelectorAll<HTMLButtonElement>("[data-ponto]")];
+    const passo = () => (cartoes[1] ? cartoes[1].offsetLeft - cartoes[0].offsetLeft : lista.clientWidth);
+    const atual = () => indiceVisivel(lista.scrollLeft, passo(), cartoes.length);
+    const noFim = () => lista.scrollLeft + lista.clientWidth >= lista.scrollWidth - 2;
+
+    const atualizar = () => {
+      controles.hidden = lista.scrollWidth <= lista.clientWidth + 2;
+      const i = noFim() ? cartoes.length - 1 : atual();
+      pontos.forEach((p, j) => (j === i ? p.setAttribute("aria-current", "true") : p.removeAttribute("aria-current")));
+      anterior.disabled = lista.scrollLeft <= 2;
+      proxima.disabled = noFim();
+    };
+    const ir = (i: number) =>
+      lista.scrollTo({
+        left: cartoes[i].offsetLeft - cartoes[0].offsetLeft,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+
+    anterior.addEventListener("click", () => ir(proximoIndice(atual(), cartoes.length, -1)));
+    proxima.addEventListener("click", () => ir(proximoIndice(atual(), cartoes.length, 1)));
+    pontos.forEach((p, j) => p.addEventListener("click", () => ir(j)));
+    lista.addEventListener("scroll", () => requestAnimationFrame(atualizar), { passive: true });
+    addEventListener("resize", atualizar);
+    atualizar();
+  }
+</script>

@@ -110,3 +110,18 @@ test("o CSS de cada layout e de cada variante foi para o build", () => {
 test("o foco da foto vira object-position na imagem principal", () => {
   assert.ok(pagina("exemplo-barbearia-classica").includes("object-position: 50% 0%"));
 });
+
+test("avaliações em cartões viram carrossel com setas e um ponto por avaliação; em citação, não", () => {
+  for (const l of LAYOUTS) {
+    const html = pagina(`exemplo-${l.nicho}-${l.id}`);
+    const total = (html.match(/class="depoimento"/g) ?? []).length;
+    if (l.variantes.depoimentos === "cartoes") {
+      assert.match(html, /<ul[^>]*data-carrossel/, l.id);
+      assert.match(html, /<button[^>]*data-anterior/, l.id);
+      assert.match(html, /<button[^>]*data-proxima/, l.id);
+      assert.equal((html.match(/class="depoimentos__ponto"/g) ?? []).length, total, l.id);
+    } else {
+      assert.doesNotMatch(html, /<ul[^>]*data-carrossel/, l.id);
+    }
+  }
+});

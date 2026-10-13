@@ -107,7 +107,7 @@ export function validarFicha(dado: unknown, arquivo: string): Ficha {
   depoimentos.forEach((d, i) => {
     const o = ehObj(d) ? d : {};
     exigir(ehTexto(o.autor), `depoimentos[${i}].autor é obrigatório`);
-    exigir(ehTexto(o.texto) && o.texto.length <= 500, `depoimentos[${i}].texto é obrigatório e tem no máximo 500 caracteres`);
+    exigir(ehTexto(o.texto) && o.texto.length <= 220, `depoimentos[${i}].texto é obrigatório e é um trecho de no máximo 220 caracteres`);
     exigir(inteiroEntre(o.nota, 1, 5), `depoimentos[${i}].nota precisa ser um inteiro de 1 a 5`);
   });
 

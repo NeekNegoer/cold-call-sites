@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { leadDeTeste } from "../../../prospeccao/fixtures/lead.ts";
 import type { Detalhes } from "../../../prospeccao/tipos.ts";
 import { layoutPorId } from "../tema/layouts.ts";
-import { abreviarAutor, cortarTexto, escolherDepoimentos, rascunhoDaFicha, type Nichos } from "./rascunho.ts";
+import { abreviarAutor, cortarTexto, escolherDepoimentos, rascunhoDaFicha, trechoDe, type Nichos } from "./rascunho.ts";
 import { validarFicha } from "./validar.ts";
 
 const nichos = JSON.parse(readFileSync(new URL("../../nichos.json", import.meta.url), "utf8")) as Nichos;
@@ -78,4 +78,18 @@ test("sem horário no Google: horário padrão do nicho, marcado como estimado, 
 test("sem bairro, os textos usam a cidade; nicho sem layout é recusado", () => {
   assert.equal(rascunhoDaFicha(lead({ bairro: null }), { nichos, sufixo: "k7q2", fotos: [] }).ficha.textos.titulo, "Seu corte em dia em São José");
   assert.throws(() => rascunhoDaFicha(lead({ nicho: "petshop" }), { nichos, sufixo: "k7q2", fotos: [] }), /Nicho sem layout: petshop/);
+});
+
+test("trecho da avaliação: frases inteiras até 160 caracteres, sem símbolos no começo", () => {
+  const longa = "⭐⭐⭐⭐⭐ Excelente atendimento! Fiquei muito satisfeito com o resultado do corte e com a conversa. O ambiente é limpo, climatizado e organizado, e o preço é justo. Voltarei mais vezes!";
+  assert.equal(trechoDe(longa), "Excelente atendimento! Fiquei muito satisfeito com o resultado do corte e com a conversa. O ambiente é limpo, climatizado e organizado, e o preço é justo.");
+  assert.equal(trechoDe("Muito bom"), "Muito bom");
+  const semPonto = "palavra ".repeat(40).trim();
+  assert.ok(trechoDe(semPonto).length <= 160 && trechoDe(semPonto).endsWith("…"));
+});
+
+test("o rascunho já usa trechos curtos nas avaliações", () => {
+  const texto = "Primeira frase curta. " + "Segunda frase bem longa ".repeat(10);
+  const [d] = escolherDepoimentos([{ autor: "Ana Lima", texto, nota: 5 }]);
+  assert.equal(d.texto, "Primeira frase curta.");
 });
