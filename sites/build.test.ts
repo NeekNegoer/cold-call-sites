@@ -131,5 +131,11 @@ test("selo da nota do Google: aparece com nota, total e link; some sem nota", ()
   assert.ok(html.includes('class="nota-google"'));
   assert.ok(html.includes("4,8") && html.includes("132 avaliações"));
   assert.match(html, /<svg[^>]*class="nota-google__logo"/);
+  for (const l of LAYOUTS.filter((x) => x.nicho === "barbearia")) {
+    const h = pagina(`exemplo-barbearia-${l.id}`);
+    const [subtitulo, selo, botao] = ['class="inicio__subtitulo"', 'class="nota-google"', "botao--grande"].map((x) => h.indexOf(x));
+    if (l.variantes.selo === "subtitulo") assert.ok(subtitulo < selo && selo < botao, `${l.id}: selo ao lado do subtítulo`);
+    else assert.ok(botao < selo, `${l.id}: selo embaixo do botão`);
+  }
   assert.ok(!pagina("exemplo-pior-barbearia-classica").includes('class="nota-google"'));
 });
